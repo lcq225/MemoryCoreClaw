@@ -1,0 +1,53 @@
+# MemoryCoreClaw Default Configuration
+
+# Database
+database:
+  path: "~/.memorycoreclaw/memory.db"
+  encrypt: false
+
+# Memory Layers
+layers:
+  core:
+    min_importance: 0.9
+    retention: permanent
+  important:
+    min_importance: 0.7
+    retention: long_term
+  normal:
+    min_importance: 0.5
+    retention: standard
+  minor:
+    min_importance: 0.0
+    retention: may_decay
+
+# Forgetting Curve
+forgetting:
+  enabled: true
+  min_strength: 0.1
+  access_bonus: 1.1
+
+# Working Memory
+working_memory:
+  capacity: 9
+  eviction_policy: lowest_priority
+
+# Semantic Search
+semantic_search:
+  enabled: true
+  embedding_model: null
+  keyword_fallback: true
+
+# Ontology
+ontology:
+  allow_custom_relations: true
+  inference_threshold: 0.5
+
+# Export
+export:
+  default_format: json
+  include_metadata: true
+
+# Logging
+logging:
+  level: INFO
+  file: null

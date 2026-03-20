@@ -316,12 +316,12 @@ from memorycoreclaw import Memory
 mem = Memory()
 
 # 记住事实
-mem.remember("Mr Lee 在海科化工工作", importance=0.9)
-mem.remember("Mr Lee 喜欢 BLUF 沟通风格", importance=0.8, category="preference")
+mem.remember("Alice 在 Acme Corp 工作", importance=0.9)
+mem.remember("Alice 喜欢简洁的沟通风格", importance=0.8, category="preference")
 
 # 召回记忆
-results = mem.recall("Mr Lee")
-# 返回所有与 Mr Lee 相关的记忆
+results = mem.recall("Alice")
+# 返回所有与 Alice 相关的记忆
 
 # 学习经验
 mem.learn(
@@ -333,8 +333,8 @@ mem.learn(
 )
 
 # 建立关系
-mem.relate("Mr Lee", "works_at", "海科化工")
-mem.relate("海科化工", "located_in", "东营")
+mem.relate("Alice", "works_at", "Acme Corp")
+mem.relate("Acme Corp", "located_in", "Beijing")
 ```
 
 ### 4.2 与 AI Agent 集成

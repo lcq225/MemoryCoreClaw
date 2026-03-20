@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected GitHub repository URLs from `memorycoreclaw/memorycoreclaw` to `lcq225/MemoryCoreClaw`
 - Removed hardcoded paths from visualization CLI
 
-## [0.1.0] - 2026-03-19
+## [1.0.0] - 2026-03-19
 
 ### Added
 - Core memory engine with fact/experience/entity storage

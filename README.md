@@ -61,7 +61,7 @@ Based on the Ebbinghaus forgetting curve model:
 - Markdown format export
 - Knowledge graph HTML visualization
 
-### 📊 Visualization (New in v2.0)
+### 📊 Visualization (New in v2.0.0)
 - **Knowledge Graph** - Interactive D3.js force-directed graph with drag, zoom, and click-to-view details
 - **Statistics Report** - Memory count, categories, relation types visualization
 - **Memory Browser** - Searchable facts/lessons/relations list

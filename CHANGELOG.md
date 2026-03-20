@@ -5,7 +5,31 @@ All notable changes to MemoryCoreClaw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2024-03-19
+## [2.0.0] - 2026-03-20
+
+### Added
+- **Enhanced Visualization Module**
+  - Interactive D3.js knowledge graph with drag/zoom/click
+  - Statistics report with memory breakdown
+  - Memory browser with search and filter
+  - Standalone CLI for generating visualizations
+- **Environment Variable Support**
+  - `MEMORY_DB_PATH` - Custom database path
+  - `MEMORY_OUTPUT_DIR` - Custom output directory
+- **Improved Database Compatibility**
+  - Fixed entity table column name (`type` vs `entity_type`)
+  - Direct database query for visualization
+
+### Changed
+- Visualization module now works independently without Memory engine instance
+- CLI uses environment variables instead of hardcoded paths
+- Fixed project URLs in `pyproject.toml`
+
+### Fixed
+- Corrected GitHub repository URLs from `memorycoreclaw/memorycoreclaw` to `lcq225/MemoryCoreClaw`
+- Removed hardcoded paths from visualization CLI
+
+## [0.1.0] - 2026-03-19
 
 ### Added
 - Core memory engine with fact/experience/entity storage

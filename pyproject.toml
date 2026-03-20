@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memorycoreclaw"
-version = "0.1.0"
+version = "2.0.0"
 description = "A human-like memory engine for AI applications"
 readme = "README.md"
 license = {text = "MIT"}
@@ -55,10 +55,10 @@ visualization = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/memorycoreclaw/memorycoreclaw"
-Documentation = "https://github.com/memorycoreclaw/memorycoreclaw#readme"
-Repository = "https://github.com/memorycoreclaw/memorycoreclaw.git"
-Issues = "https://github.com/memorycoreclaw/memorycoreclaw/issues"
+Homepage = "https://github.com/lcq225/MemoryCoreClaw"
+Documentation = "https://github.com/lcq225/MemoryCoreClaw#readme"
+Repository = "https://github.com/lcq225/MemoryCoreClaw.git"
+Issues = "https://github.com/lcq225/MemoryCoreClaw/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

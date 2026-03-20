@@ -61,6 +61,19 @@ Based on the Ebbinghaus forgetting curve model:
 - Markdown format export
 - Knowledge graph HTML visualization
 
+### 📊 Visualization (New in v2.0)
+- **Knowledge Graph** - Interactive D3.js force-directed graph with drag, zoom, and click-to-view details
+- **Statistics Report** - Memory count, categories, relation types visualization
+- **Memory Browser** - Searchable facts/lessons/relations list
+
+```bash
+# Generate visualizations
+python -m memorycoreclaw.utils.visualization
+
+# Or specify custom paths via environment variables
+MEMORY_DB_PATH=/path/to/memory.db MEMORY_OUTPUT_DIR=./output python -m memorycoreclaw.utils.visualization
+```
+
 ---
 
 ## Quick Start

@@ -1,0 +1,8 @@
+feat: v2.0.0 - Enhanced visualization module
+
+- Add interactive D3.js knowledge graph with drag/zoom/click
+- Add statistics report with memory breakdown
+- Add memory browser with search and filter
+- Fix project URLs in pyproject.toml
+- Remove hardcoded paths (use environment variables)
+- Update CHANGELOG and README

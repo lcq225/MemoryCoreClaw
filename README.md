@@ -62,9 +62,24 @@ Based on the Ebbinghaus forgetting curve model:
 - Knowledge graph HTML visualization
 
 ### 📊 Visualization (New in v2.0.0)
+
 - **Knowledge Graph** - Interactive D3.js force-directed graph with drag, zoom, and click-to-view details
 - **Statistics Report** - Memory count, categories, relation types visualization
 - **Memory Browser** - Searchable facts/lessons/relations list
+
+#### Screenshots
+
+**Knowledge Graph:**
+
+![Knowledge Graph](docs/images/knowledge_graph.png)
+
+**Statistics Report:**
+
+![Statistics Report](docs/images/stats_report.png)
+
+**Memory Browser:**
+
+![Memory Browser](docs/images/memory_browser.png)
 
 ```bash
 # Generate visualizations

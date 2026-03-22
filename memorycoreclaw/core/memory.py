@@ -81,6 +81,22 @@ class Memory:
             self._working = WorkingMemory(self.core.db_path, self.session_id)
         return self._working
     
+    @property
+    def semantic(self):
+        """Lazy load semantic search engine."""
+        if self._semantic is None:
+            from ..retrieval.semantic import create_search_engine
+            self._semantic = create_search_engine(self.core.db_path)
+        return self._semantic
+    
+    @property
+    def associative(self):
+        """Lazy load associative memory engine."""
+        if getattr(self, '_associative', None) is None:
+            from ..cognitive.associative import AssociativeMemory
+            self._associative = AssociativeMemory(self.core.db_path)
+        return self._associative
+    
     # ==================== Core Operations ====================
     
     def remember(self, content: str, 
@@ -109,17 +125,42 @@ class Memory:
             tags=tags or []
         )
     
-    def recall(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def recall(self, query: str, limit: int = 5, use_semantic: bool = True) -> List[Dict[str, Any]]:
         """
         Search memories by keyword or semantic similarity.
+        
+        Automatically uses semantic search when embedding service available,
+        falls back to keyword search otherwise.
         
         Args:
             query: Search query
             limit: Maximum results
+            use_semantic: Whether to try semantic search first
             
         Returns:
             List of matching memories
         """
+        # Try semantic search first
+        if use_semantic:
+            try:
+                semantic_results = self.semantic.search(query, memory_type='fact', limit=limit)
+                if semantic_results:
+                    # Convert SearchResult to dict format
+                    results = []
+                    for r in semantic_results:
+                        results.append({
+                            'id': r.id,
+                            'content': r.content,
+                            'score': r.score,
+                            'importance': r.metadata.get('importance', 0.5),
+                            'category': r.metadata.get('category', 'general'),
+                            'search_type': r.search_type
+                        })
+                    return results
+            except Exception:
+                pass  # Fall through to keyword search
+        
+        # Fallback to keyword search
         results = self.core.recall(query, limit)
         
         # Enhance results with forgetting curve
@@ -130,6 +171,32 @@ class Memory:
             )
         
         return results
+    
+    def recall_by_category(self, category: str, limit: int = 20) -> List[Dict[str, Any]]:
+        """
+        Search memories by category.
+        
+        Args:
+            category: Category to filter by (e.g., 'preference', 'config', 'milestone')
+            limit: Maximum results
+            
+        Returns:
+            List of matching memories
+        """
+        return self.core.recall_by_category(category, limit)
+    
+    def recall_by_importance(self, min_importance: float = 0.7, limit: int = 20) -> List[Dict[str, Any]]:
+        """
+        Search memories by minimum importance.
+        
+        Args:
+            min_importance: Minimum importance threshold (0-1)
+            limit: Maximum results
+            
+        Returns:
+            List of matching memories
+        """
+        return self.core.recall_by_importance(min_importance, limit)
     
     def learn(self, action: str, context: str, 
               outcome: str, insight: str,
@@ -207,6 +274,75 @@ class Memory:
             Association network with entities and relations
         """
         return self.core.associate(entity, depth)
+    
+    # ==================== Associative Memory ====================
+    
+    def diverge(self, seed: str, max_depth: int = 3, min_score: float = 0.1) -> List[Dict[str, Any]]:
+        """
+        Divergent memory: Spread activation from a seed entity.
+        
+        Activates the entire knowledge network from one trigger point.
+        Like human memory: "海科" → Mr Lee, 东营, 化工...
+        
+        Args:
+            seed: Starting entity
+            max_depth: Maximum traversal depth (default 3)
+            min_score: Minimum activation score to include
+            
+        Returns:
+            List of activated entities with scores and paths
+        """
+        results = self.associative.diverge(seed, max_depth, min_score)
+        return [
+            {
+                'entity': r.entity,
+                'score': r.score,
+                'depth': r.depth,
+                'path': r.path,
+                'relation_type': r.relation_type
+            }
+            for r in results
+        ]
+    
+    def converge(self, clues: List[str], min_evidence: int = 2) -> List[Dict[str, Any]]:
+        """
+        Convergent memory: Multiple clues aggregating to core entity.
+        
+        Like human reasoning: "BLUF" + "IT" + "东营" → Mr Lee
+        
+        Args:
+            clues: List of clue entities
+            min_evidence: Minimum number of clues pointing to entity
+            
+        Returns:
+            List of converged entities with scores and evidence
+        """
+        results = self.associative.converge(clues, min_evidence)
+        return [
+            {
+                'entity': r.entity,
+                'score': r.score,
+                'confidence': r.confidence,
+                'evidence': r.evidence
+            }
+            for r in results
+        ]
+    
+    def smart_recall(self, query: str) -> Dict[str, Any]:
+        """
+        Smart recall that automatically chooses between diverge and converge.
+        
+        - 1 entity in query → diverge (learn about this entity)
+        - 2+ entities in query → converge (find common connection)
+        - No entities → keyword search
+        
+        Args:
+            query: User query
+            
+        Returns:
+            Dict with mode used and results
+        """
+        return self.associative.smart_recall(query)
     
     # ==================== Contextual Memory ====================
     
@@ -311,6 +447,7 @@ class Memory:
             'used': self.working.used,
             'capacity': self.working.capacity
         }
+        stats['search'] = self.semantic.get_status()
         return stats
     
     # ==================== Export ====================

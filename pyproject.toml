@@ -4,13 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memorycoreclaw"
-version = "2.0.0"
-description = "A human-like memory engine for AI applications"
+version = "2.1.0"
+description = "A human-like memory engine for AI applications with safety enhancements"
 readme = "README.md"
-license = {text = "MIT"}
-authors = [
-    {name = "MemoryCoreClaw Team", email = "memorycoreclaw@example.com"}
-]
+license = "MIT"
 keywords = [
     "memory",
     "ai",
@@ -22,7 +19,6 @@ keywords = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",

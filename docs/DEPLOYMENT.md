@@ -1,51 +1,40 @@
-# MemoryCoreClaw 部署文档
+# MemoryCoreClaw 部署指南
 
-本文档详细介绍 MemoryCoreClaw 的安装、配置和部署方式。
+> 从安装到生产的完整部署流程
 
 ---
 
-## 目录
+## 📋 目录
 
-1. [环境要求](#环境要求)
-2. [安装方式](#安装方式)
-3. [配置说明](#配置说明)
-4. [部署场景](#部署场景)
-5. [数据管理](#数据管理)
-6. [性能优化](#性能优化)
-7. [故障排查](#故障排查)
+- [环境要求](#环境要求)
+- [安装方式](#安装方式)
+- [基础配置](#基础配置)
+- [高级配置](#高级配置)
+- [与 AI Agent 集成](#与-ai-agent-集成)
+- [生产环境部署](#生产环境部署)
+- [监控与维护](#监控与维护)
+- [故障排查](#故障排查)
 
 ---
 
 ## 环境要求
 
-### 系统要求
+### 基础要求
 
-| 系统 | 版本 | 状态 |
-|------|------|------|
-| Windows | 10/11 | ✅ 支持 |
-| Linux | Ubuntu 18.04+, CentOS 7+ | ✅ 支持 |
-| macOS | 10.15+ | ✅ 支持 |
+| 项目 | 版本要求 |
+|------|---------|
+| Python | ≥ 3.8 |
+| SQLite | ≥ 3.35.0 |
+| 内存 | ≥ 100MB |
+| 磁盘 | ≥ 50MB |
 
-### Python 版本
+### 可选依赖
 
-| Python 版本 | 状态 |
-|-------------|------|
-| 3.8 | ⚠️ 最低要求 |
-| 3.9 | ✅ 推荐 |
-| 3.10 | ✅ 支持 |
-| 3.11 | ✅ 支持 |
-| 3.12+ | 🧪 测试中 |
-
-### 依赖项
-
-```
-# 核心依赖（必需）
-sqlite3      # Python 内置
-
-# 可选依赖
-sentence-transformers  # 语义搜索
-cryptography          # 数据库加密
-```
+| 功能 | 依赖包 |
+|------|--------|
+| 语义搜索 | `sentence-transformers` |
+| 可视化 | `matplotlib`, `networkx` |
+| 加密存储 | `cryptography` |
 
 ---
 
@@ -60,57 +49,52 @@ pip install memorycoreclaw
 ### 方式二：从源码安装
 
 ```bash
-# 克隆仓库
 git clone https://github.com/lcq225/MemoryCoreClaw.git
 cd MemoryCoreClaw
-
-# 安装
 pip install -e .
 ```
 
-### 方式三：下载 Release
+### 方式三：指定可选依赖
 
 ```bash
-# 从 GitHub Releases 下载
-wget https://github.com/lcq225/MemoryCoreClaw/archive/refs/tags/v1.0.0.tar.gz
-tar -xzf v1.0.0.tar.gz
-cd MemoryCoreClaw-1.0.0
-pip install .
-```
+# 安装语义搜索支持
+pip install memorycoreclaw[embeddings]
 
-### 验证安装
+# 安装可视化支持
+pip install memorycoreclaw[visualization]
 
-```python
-from memorycoreclaw import Memory
-mem = Memory()
-print("✅ 安装成功！")
+# 安装开发依赖
+pip install memorycoreclaw[dev]
 ```
 
 ---
 
-## 配置说明
+## 基础配置
 
-### 配置文件位置
+### 快速开始
 
+```python
+from memorycoreclaw import Memory
+
+# 使用默认配置
+mem = Memory()
+
+# 指定数据库路径
+mem = Memory(db_path="/path/to/your/memory.db")
 ```
-~/.memorycoreclaw/
-├── memory.db        # 默认数据库
-├── config.yaml      # 用户配置（可选）
-└── backups/         # 备份目录
-```
 
-### 配置文件格式
+### 配置文件
 
-创建 `~/.memorycoreclaw/config.yaml`：
+创建 `config/memory.yaml`：
 
 ```yaml
 # 数据库配置
 database:
   path: "~/.memorycoreclaw/memory.db"
-  encrypt: false                    # 是否加密
-  encryption_key: null              # 加密密钥（如启用）
+  encrypt: false
+  pool_size: 5
 
-# 记忆分层配置
+# 记忆分层
 layers:
   core:
     min_importance: 0.9
@@ -125,146 +109,250 @@ layers:
     min_importance: 0.0
     retention: may_decay
 
-# 遗忘曲线配置
+# 遗忘曲线
 forgetting:
   enabled: true
-  min_strength: 0.1                 # 最低强度阈值
-  access_bonus: 1.1                 # 访问加成
-  decay_rate: 0.1                   # 衰减率
+  decay_rate: 0.1
+  min_strength: 0.1
+  access_bonus: 1.1
 
-# 工作记忆配置
+# 工作记忆
 working_memory:
-  capacity: 9                       # 容量（7±2 模型）
-  eviction_policy: lowest_priority  # 驱逐策略
-  default_ttl: null                 # 默认过期时间（秒）
+  capacity: 9
+  eviction_policy: lowest_priority
+  default_ttl: 3600
 
-# 语义搜索配置
-semantic_search:
-  enabled: true
-  embedding_model: null             # 嵌入模型（如 sentence-transformers）
-  keyword_fallback: true            # 关键词回退
-
-# 关系学习配置
-ontology:
-  allow_custom_relations: true      # 允许自定义关系
-  inference_threshold: 0.5          # 推断阈值
-
-# 导出配置
-export:
-  default_format: json
-  include_metadata: true
-
-# 日志配置
-logging:
-  level: INFO                       # DEBUG, INFO, WARNING, ERROR
-  file: null                        # 日志文件路径
-```
-
-### 代码中指定配置
-
-```python
-from memorycoreclaw import Memory
-
-# 方式一：指定数据库路径
-mem = Memory(db_path="/path/to/custom.db")
-
-# 方式二：使用配置文件
-# 配置文件会自动从 ~/.memorycoreclaw/config.yaml 加载
-mem = Memory()
+# 语义搜索
+semantic:
+  enabled: false
+  model: "sentence-transformers/all-MiniLM-L6-v2"
+  dimensions: 384
 ```
 
 ---
 
-## 部署场景
+## 高级配置
 
-### 场景一：单机应用
-
-最简单的部署方式，适用于个人项目或单用户场景。
+### 语义搜索配置
 
 ```python
 from memorycoreclaw import Memory
 
-# 默认配置，数据存储在 ~/.memorycoreclaw/memory.db
-mem = Memory()
+# 启用语义搜索
+mem = Memory(
+    db_path="memory.db",
+    embedding_config={
+        "backend": "openai",
+        "api_key": "your-api-key",
+        "base_url": "https://api.openai.com/v1",
+        "model_name": "text-embedding-3-small",
+        "dimensions": 1536
+    }
+)
+
+# 或使用本地模型
+mem = Memory(
+    db_path="memory.db",
+    embedding_config={
+        "backend": "openai",
+        "api_key": "ollama",
+        "base_url": "http://localhost:11434/v1",
+        "model_name": "bge-m3",
+        "dimensions": 1024
+    }
+)
 ```
 
-### 场景二：多用户应用
+### 环境变量配置
 
-为每个用户创建独立的数据库或使用 session_id 隔离。
+```bash
+# 数据库路径
+export MEMORY_DB_PATH="/data/memory.db"
+
+# 输出目录
+export MEMORY_OUTPUT_DIR="/data/output"
+
+# Embedding 配置
+export MEMORY_EMBEDDING_BACKEND="openai"
+export MEMORY_EMBEDDING_API_KEY="your-key"
+export MEMORY_EMBEDDING_BASE_URL="https://api.openai.com/v1"
+export MEMORY_EMBEDDING_MODEL="text-embedding-3-small"
+```
+
+---
+
+## 与 AI Agent 集成
+
+### 与 CoPaw 集成
+
+MemoryCoreClaw 可作为 CoPaw 的技能使用：
+
+```
+# 目录结构
+.copaw/
+└── workspaces/
+    └── default/
+        └── active_skills/
+            └── memorycoreclaw/
+                ├── __init__.py
+                ├── core/
+                ├── cognitive/
+                ├── retrieval/
+                ├── storage/
+                ├── utils/
+                └── scripts/
+```
+
+```python
+# 在 CoPaw 中使用
+import sys
+sys.path.insert(0, 'active_skills')
+from memorycoreclaw import Memory
+
+mem = Memory(db_path=r"D:\CoPaw\.copaw\.agent-memory\memory.db")
+
+# 记住用户偏好
+mem.remember("用户喜欢简洁的回复", importance=0.85, category="preference")
+
+# 召回记忆辅助回复
+preferences = mem.recall_by_category("preference")
+```
+
+### 与 LangChain 集成
+
+```python
+from langchain.memory import BaseMemory
+from memorycoreclaw import Memory
+
+class MemoryCoreClawMemory(BaseMemory):
+    """LangChain 记忆适配器"""
+    
+    def __init__(self, db_path=None):
+        self.mem = Memory(db_path=db_path)
+    
+    @property
+    def memory_variables(self):
+        return ["memory_context"]
+    
+    def load_memory_variables(self, inputs):
+        query = inputs.get("input", "")
+        memories = self.mem.recall(query, limit=5)
+        context = "\n".join([m["content"] for m in memories])
+        return {"memory_context": context}
+    
+    def save_context(self, inputs, outputs):
+        user_input = inputs.get("input", "")
+        ai_output = outputs.get("output", "")
+        self.mem.remember(
+            f"User: {user_input}",
+            importance=0.5,
+            source="user"
+        )
+        self.mem.remember(
+            f"AI: {ai_output}",
+            importance=0.5,
+            source="llm"
+        )
+    
+    def clear(self):
+        pass
+
+# 使用
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import ConversationChain
+
+memory = MemoryCoreClawMemory()
+llm = ChatOpenAI()
+chain = ConversationChain(llm=llm, memory=memory)
+```
+
+### 与 AutoGen 集成
 
 ```python
 from memorycoreclaw import Memory
+import autogen
 
-# 方式一：每个用户独立数据库
-user_mem = Memory(db_path=f"/data/memories/{user_id}.db")
-
-# 方式二：共享数据库，session 隔离（工作记忆）
-user_mem = Memory(db_path="/data/shared.db", session_id=user_id)
+# 创建记忆增强的 Agent
+class MemoryEnabledAgent(autogen.ConversableAgent):
+    def __init__(self, name, **kwargs):
+        super().__init__(name, **kwargs)
+        self.memory = Memory()
+    
+    def generate_reply(self, messages, sender=None, **kwargs):
+        # 召回相关记忆
+        last_message = messages[-1]["content"] if messages else ""
+        relevant_memories = self.memory.recall(last_message, limit=3)
+        
+        # 增强上下文
+        memory_context = "\n".join([m["content"] for m in relevant_memories])
+        if memory_context:
+            messages = [{
+                "role": "system",
+                "content": f"相关记忆：\n{memory_context}"
+            }] + messages
+        
+        # 生成回复
+        reply = super().generate_reply(messages, sender, **kwargs)
+        
+        # 记住对话
+        self.memory.remember(
+            f"与 {sender} 对话：{last_message[:100]}",
+            importance=0.5,
+            source="user"
+        )
+        
+        return reply
 ```
 
-### 场景三：服务器部署
+---
 
-```python
-import os
-from memorycoreclaw import Memory
+## 生产环境部署
 
-# 使用环境变量配置
-db_path = os.environ.get("MEMORY_DB_PATH", "/data/memory.db")
-mem = Memory(db_path=db_path)
-```
-
-### 场景四：Docker 部署
-
-**Dockerfile**
+### Docker 部署
 
 ```dockerfile
-FROM python:3.9-slim
+# Dockerfile
+FROM python:3.11-slim
 
 WORKDIR /app
 
 # 安装依赖
-RUN pip install memorycoreclaw
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 复制代码
+COPY . .
 
 # 创建数据目录
 RUN mkdir -p /data
 
 # 设置环境变量
 ENV MEMORY_DB_PATH=/data/memory.db
+ENV MEMORY_OUTPUT_DIR=/data/output
 
-# 复制应用代码
-COPY app.py .
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "from memorycoreclaw import Memory; m = Memory(); print('OK')" || exit 1
 
-CMD ["python", "app.py"]
+CMD ["python", "-m", "memorycoreclaw.utils.visualization"]
 ```
-
-**docker-compose.yml**
-
-```yaml
-version: '3.8'
-
-services:
-  app:
-    build: .
-    volumes:
-      - memory_data:/data
-    environment:
-      - MEMORY_DB_PATH=/data/memory.db
-
-volumes:
-  memory_data:
-```
-
-**运行**
 
 ```bash
-docker-compose up -d
+# 构建镜像
+docker build -t memorycoreclaw:2.1.0 .
+
+# 运行容器
+docker run -d \
+    --name memorycoreclaw \
+    -v /data/memory:/data \
+    -e MEMORY_DB_PATH=/data/memory.db \
+    memorycoreclaw:2.1.0
 ```
 
-### 场景五：Kubernetes 部署
-
-**deployment.yaml**
+### Kubernetes 部署
 
 ```yaml
+# deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -280,306 +368,192 @@ spec:
         app: memorycoreclaw
     spec:
       containers:
-      - name: app
-        image: memorycoreclaw:latest
-        volumeMounts:
-        - name: memory-storage
-          mountPath: /data
+      - name: memorycoreclaw
+        image: memorycoreclaw:2.1.0
+        ports:
+        - containerPort: 8080
         env:
         - name: MEMORY_DB_PATH
-          value: /data/memory.db
+          value: "/data/memory.db"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "from memorycoreclaw import Memory; Memory()"
+          initialDelaySeconds: 10
+          periodSeconds: 30
       volumes:
-      - name: memory-storage
+      - name: data
         persistentVolumeClaim:
-          claimName: memory-pvc
-```
-
-**pvc.yaml**
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: memory-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
+          claimName: memorycoreclaw-pvc
 ```
 
 ---
 
-## 数据管理
+## 监控与维护
 
-### 备份数据
+### 健康检查脚本
 
-```python
-from memorycoreclaw import Memory
-import json
-from datetime import datetime
+```bash
+# 检查数据库状态
+python scripts/check_memory.py
 
-mem = Memory()
-
-# 导出所有数据
-data = mem.export()
-
-# 保存到文件
-backup_file = f"memory_backup_{datetime.now().strftime('%Y%m%d')}.json"
-with open(backup_file, 'w', encoding='utf-8') as f:
-    json.dump(data, f, ensure_ascii=False, indent=2)
-
-print(f"备份完成: {backup_file}")
+# 输出示例：
+# 📊 MemoryCoreClaw 数据库状态
+# ================================
+# 📝 事实记忆：124 条
+# 📚 经验教训：51 条
+# 🔗 实体关系：45 条
+# 🎯 实体定义：42 条
+# 
+# ✅ 数据库健康
 ```
 
-### 恢复数据
+### 定期优化
 
-```python
-from memorycoreclaw import Memory
-import json
+```bash
+# 优化数据库
+python scripts/optimize_database.py
 
-mem = Memory()
-
-# 从备份恢复
-with open('memory_backup_20240319.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
-
-# 导入数据
-from memorycoreclaw.utils.export import MemoryExporter
-exporter = MemoryExporter(mem.core)
-exporter.import_data(data)
-
-print("恢复完成！")
+# 输出示例：
+# 🔧 数据库优化完成
+# - 清理孤立记录：3 条
+# - 修复记忆强度：5 条
+# - 补充实体定义：2 条
 ```
 
-### 数据迁移
+### 自动化维护（Cron）
 
-```python
-import sqlite3
-from memorycoreclaw import Memory
+```bash
+# 添加到 crontab
+# 每天凌晨 2 点优化数据库
+0 2 * * * cd /app && python scripts/optimize_database.py >> /var/log/memory_optimize.log 2>&1
 
-# 源数据库
-source_db = "/old/path/memory.db"
-# 目标数据库
-target_db = "/new/path/memory.db"
-
-# 直接复制数据库文件
-import shutil
-shutil.copy(source_db, target_db)
-
-# 验证
-mem = Memory(db_path=target_db)
-stats = mem.get_stats()
-print(f"迁移完成: {stats['facts']} 条记忆")
+# 每周日凌晨 3 点检查重复
+0 3 * * 0 cd /app && python scripts/check_duplicates.py >> /var/log/memory_check.log 2>&1
 ```
-
----
-
-## 性能优化
-
-### 数据库优化
-
-```python
-from memorycoreclaw import Memory
-import sqlite3
-
-mem = Memory()
-
-# 手动执行 VACUUM（压缩数据库）
-conn = sqlite3.connect(mem.core.db_path)
-conn.execute("VACUUM")
-conn.close()
-
-print("数据库优化完成！")
-```
-
-### 批量操作
-
-```python
-from memorycoreclaw import Memory
-
-mem = Memory()
-
-# 批量添加记忆
-facts = [
-    ("Alice 擅长 Python", 0.8),
-    ("Bob 擅长 Java", 0.7),
-    ("Carol 擅长 Go", 0.7),
-]
-
-for content, importance in facts:
-    mem.remember(content, importance=importance)
-
-print(f"批量添加 {len(facts)} 条记忆")
-```
-
-### 索引优化
-
-数据库已自动创建以下索引：
-- `idx_facts_content` - 内容索引
-- `idx_relations_from` - 关系起点索引
-- `idx_relations_to` - 关系终点索引
 
 ---
 
 ## 故障排查
 
-### 问题 1：数据库锁定
+### 常见问题
 
-**症状：** `sqlite3.OperationalError: database is locked`
+#### 1. 数据库锁定
 
-**原因：** SQLite 不支持多进程写入
-
-**解决方案：**
-```python
-# 方案一：每个进程使用独立数据库
-mem = Memory(db_path=f"/data/memory_{process_id}.db")
-
-# 方案二：使用连接池（需要额外配置）
-# 方案三：切换到 PostgreSQL/MySQL
+```
+错误：database is locked
 ```
 
-### 问题 2：内存占用过高
+**解决方案：**
+- 确保没有其他进程占用数据库
+- 使用连接池
+- 考虑使用 WAL 模式
 
-**症状：** 内存使用持续增长
+```python
+# 启用 WAL 模式
+mem = Memory(db_path="memory.db", wal_mode=True)
+```
+
+#### 2. 向量搜索失败
+
+```
+错误：embedding failed
+```
 
 **解决方案：**
+- 检查 Embedding 配置
+- 确认模型可用
+- 自动降级到关键词搜索
+
 ```python
+# 检查配置
 from memorycoreclaw import Memory
+mem = Memory(
+    db_path="memory.db",
+    embedding_config={
+        "backend": "openai",
+        "base_url": "http://localhost:11434/v1",  # 本地 Ollama
+        "model_name": "bge-m3"
+    }
+)
 
-mem = Memory()
-
-# 清理低强度记忆
-mem.apply_forgetting()
-
-# 清理工作记忆
-mem.clear_working_memory()
-
-# 执行 VACUUM
-import sqlite3
-conn = sqlite3.connect(mem.core.db_path)
-conn.execute("VACUUM")
-conn.close()
+# 测试连接
+result = mem.recall("测试", limit=1)
+print(f"搜索状态：{'成功' if result else '失败'}")
 ```
 
-### 问题 3：查询速度慢
-
-**症状：** recall() 返回缓慢
+#### 3. 内存占用过高
 
 **解决方案：**
-```python
-# 方案一：限制返回数量
-results = mem.recall("query", limit=5)
+- 定期清理低重要性记忆
+- 使用记忆压缩
+- 限制工作记忆容量
 
-# 方案二：使用更精确的关键词
-results = mem.recall("Alice TechCorp")  # 比 "Alice" 更精确
-
-# 方案三：定期执行 VACUUM 和 ANALYZE
-import sqlite3
-conn = sqlite3.connect(mem.core.db_path)
-conn.execute("VACUUM")
-conn.execute("ANALYZE")
-conn.close()
-```
-
-### 问题 4：导入错误
-
-**症状：** `ModuleNotFoundError: No module named 'memorycoreclaw'`
-
-**解决方案：**
 ```bash
-# 确认安装
-pip list | grep memorycoreclaw
-
-# 重新安装
-pip install --force-reinstall memorycoreclaw
-
-# 或从源码安装
-git clone https://github.com/lcq225/MemoryCoreClaw.git
-cd MemoryCoreClaw
-pip install -e .
+# 清理低重要性记忆
+python scripts/optimize_database.py --cleanup-minor
 ```
 
----
-
-## 监控指标
+### 日志配置
 
 ```python
+import logging
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='memorycoreclaw.log'
+)
+
+# 使用
 from memorycoreclaw import Memory
-
-mem = Memory()
-
-# 获取统计信息
-stats = mem.get_stats()
-
-print(f"""
-MemoryCoreClaw 状态报告
-========================
-事实记忆: {stats['facts']} 条
-经验教训: {stats['experiences']} 条
-实体关系: {stats['relations']} 条
-实体数量: {stats['entities']} 个
-""")
-
-# 检查数据库大小
-import os
-db_size = os.path.getsize(mem.core.db_path) / (1024 * 1024)
-print(f"数据库大小: {db_size:.2f} MB")
+mem = Memory(db_path="memory.db")
+# 操作日志会自动记录
 ```
 
 ---
 
-## 安全建议
+## 升级指南
 
-1. **数据加密**
-   ```yaml
-   database:
-     encrypt: true
-     encryption_key: "your-secret-key"
-   ```
+### 从 v2.0.0 升级到 v2.1.0
 
-2. **访问控制**
-   - 数据库文件权限设置为 600
-   - 不要在代码中硬编码敏感信息
+```bash
+# 1. 备份数据库
+cp memory.db memory.db.backup
 
-3. **定期备份**
-   - 设置自动备份脚本
-   - 异地备份重要数据
+# 2. 升级包
+pip install memorycoreclaw==2.1.0
 
-4. **日志审计**
-   ```yaml
-   logging:
-     level: INFO
-     file: "/var/log/memorycoreclaw.log"
-   ```
+# 3. 运行优化脚本（添加新字段）
+python scripts/optimize_database.py --upgrade
 
----
+# 4. 验证
+python scripts/check_memory.py
+```
 
-## 常见问题 (FAQ)
+### 数据迁移
 
-**Q: 支持多语言吗？**
-A: 是的，内容支持任意语言，但关系类型目前为英文。
+```python
+# 从旧版本迁移数据
+from memorycoreclaw import Memory
 
-**Q: 可以用于生产环境吗？**
-A: 可以，SQLite 稳定可靠，支持百万级记录。
+# 连接旧数据库
+old_mem = Memory(db_path="old_memory.db")
+# 导出数据
+data = old_mem.export_json()
 
-**Q: 如何实现分布式部署？**
-A: 目前为单机版，分布式版本规划中。可通过每个节点独立数据库实现。
-
-**Q: 数据会丢失吗？**
-A: SQLite 是持久化存储，程序重启后数据不会丢失。建议定期备份。
+# 连接新数据库
+new_mem = Memory(db_path="new_memory.db")
+# 导入数据
+new_mem.import_json(data)
+```
 
 ---
 
-## 更新日志
-
-查看 [CHANGELOG.md](../CHANGELOG.md) 了解版本更新历史。
-
----
-
-## 获取帮助
-
-- 📖 文档：[docs/](./)
-- 🐛 问题反馈：[GitHub Issues](https://github.com/lcq225/MemoryCoreClaw/issues)
-- 💬 讨论：[GitHub Discussions](https://github.com/lcq225/MemoryCoreClaw/discussions)
+**MemoryCoreClaw v2.1.0** - 安全、可靠的 AI 记忆引擎

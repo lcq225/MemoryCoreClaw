@@ -1,6 +1,29 @@
 # MemoryCoreClaw API Reference
 
-## Core Class: Memory
+> **版本：v2.1.0**
+> 
+> 新增：SafeMemory 安全接口、来源追踪、边界检查
+
+---
+
+## Quick Start
+
+```python
+from memorycoreclaw import Memory
+
+# 基础接口
+mem = Memory(db_path="memory.db")
+
+# 安全接口（推荐）
+from memorycoreclaw import SafeMemory
+safe_mem = SafeMemory(db_path="memory.db")
+```
+
+---
+
+## Core Classes
+
+### Memory (基础接口)
 
 ```python
 from memorycoreclaw import Memory
@@ -8,12 +31,20 @@ from memorycoreclaw import Memory
 mem = Memory(db_path=None, session_id=None)
 ```
 
-### Parameters
+### SafeMemory (安全接口 - v2.1.0)
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| db_path | str | `~/.memorycoreclaw/memory.db` | Database path |
-| session_id | str | None | Session identifier |
+```python
+from memorycoreclaw import SafeMemory
+
+mem = SafeMemory(db_path="memory.db")
+```
+
+**安全特性：**
+- 连接管理（自动关闭）
+- 事务保护（自动提交/回滚）
+- 边界检查（自动修正无效参数）
+- 核心记忆保护（防误删）
+- 来源标记（追踪记忆来源）
 
 ---
 
@@ -29,7 +60,10 @@ mem.remember(
     importance: float = 0.5,
     category: str = None,
     emotion: str = None,
-    tags: List[str] = None
+    tags: List[str] = None,
+    # v2.1.0 新增
+    source: str = "user",        # user/llm/document/system
+    source_confidence: float = 1.0
 ) -> int
 ```
 
@@ -37,7 +71,17 @@ mem.remember(
 
 **Example**:
 ```python
+# 基础用法
 fid = mem.remember("Python 3.11 released", importance=0.7)
+
+# v2.1.0: 带来源标记
+fid = mem.remember(
+    "用户偏好简洁回复",
+    importance=0.85,
+    category="preference",
+    source="user",
+    source_confidence=1.0
+)
 ```
 
 ---
@@ -54,13 +98,18 @@ mem.recall(
 ) -> List[Dict]
 ```
 
+**v2.1.0 边界检查：**
+- `limit < 0` → 自动修正为 `10`
+- `limit is None` → 自动修正为 `10`
+- `query is None` → 自动修正为 `""`
+
 **Returns**: List of matching memories
 
 **Example**:
 ```python
 results = mem.recall("Python", limit=5)
 for r in results:
-    print(r['content'], r['importance'])
+    print(r['content'], r['importance'], r.get('source'))
 ```
 
 ---
@@ -90,6 +139,61 @@ eid = mem.learn(
     insight="Always backup before updates",
     importance=0.9
 )
+```
+
+---
+
+### delete() - v2.1.0 增强
+
+Delete a memory with protection.
+
+```python
+mem.delete(
+    memory_id: int,
+    force: bool = False
+) -> Dict
+```
+
+**核心记忆保护：**
+- 重要性 ≥ 0.9 的记忆需要 `force=True` 才能删除
+- 返回警告信息而不是直接删除
+
+**Returns**: Dict with `success`, `message`, and optionally `warning`
+
+**Example**:
+```python
+# 普通记忆可直接删除
+result = mem.delete(123)
+
+# 核心记忆需要确认
+result = mem.delete(456)  # 返回 warning
+# {'success': False, 'warning': 'Core memory requires force=True'}
+
+result = mem.delete(456, force=True)  # 强制删除
+```
+
+---
+
+### health_check() - v2.1.0 新增
+
+Check database health.
+
+```python
+mem.health_check() -> Dict
+```
+
+**Returns**:
+```python
+{
+    'status': 'healthy' | 'warning' | 'error',
+    'stats': {
+        'facts': int,
+        'experiences': int,
+        'relations': int,
+        'orphaned_relations': int
+    },
+    'issues': List[str]
+}
 ```
 
 ---

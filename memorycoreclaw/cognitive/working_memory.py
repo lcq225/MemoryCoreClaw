@@ -47,17 +47,21 @@ class WorkingMemory:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
+        # 使用与 engine.py 一致的表结构
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS working_memory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id TEXT NOT NULL,
+                session_id TEXT DEFAULT 'default',
                 key TEXT NOT NULL,
                 value TEXT,
                 priority REAL DEFAULT 0.5,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 expires_at TIMESTAMP,
-                last_accessed TIMESTAMP,
-                access_count INTEGER DEFAULT 0
+                last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                access_count INTEGER DEFAULT 0,
+                ttl_seconds INTEGER,
+                tags TEXT,
+                UNIQUE(session_id, key)
             )
         ''')
         

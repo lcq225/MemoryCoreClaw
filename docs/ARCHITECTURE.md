@@ -1,5 +1,9 @@
 # MemoryCoreClaw Architecture
 
+> **版本：v2.1.0**
+> 
+> 新增：SafeMemory 安全接口、SafeDatabaseManager 线程安全数据库管理器
+
 ## Overview
 
 MemoryCoreClaw is a human-brain-inspired memory system for AI agents. It implements key cognitive memory concepts:
@@ -9,17 +13,21 @@ MemoryCoreClaw is a human-brain-inspired memory system for AI agents. It impleme
 - **Contextual Memory** - Situation-based recall
 - **Working Memory** - Limited capacity temporary storage
 - **Relation Learning** - Entity relationship inference
+- **Safety Operations** (v2.1.0) - Connection management, boundary checking, core memory protection
 
 ## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    MemoryCoreClaw                            │
+│                    MemoryCoreClaw v2.1.0                     │
 ├─────────────────────────────────────────────────────────────┤
 │  API Layer                                                   │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │  Memory (unified interface)                          │   │
+│  │  Memory (基础接口)                                    │   │
 │  │  remember | recall | learn | relate | hold | ...     │   │
+│  ├─────────────────────────────────────────────────────┤   │
+│  │  SafeMemory (安全接口 - v2.1.0)                       │   │
+│  │  + 连接管理 + 事务保护 + 边界检查 + 核心保护          │   │
 │  └─────────────────────────────────────────────────────┘   │
 ├─────────────────────────────────────────────────────────────┤
 │  Core Engine (core/engine.py)                               │
@@ -27,6 +35,7 @@ MemoryCoreClaw is a human-brain-inspired memory system for AI agents. It impleme
 │  │  • Fact CRUD         • Lesson CRUD                   │   │
 │  │  • Relation Management • Context Binding             │   │
 │  │  • Working Memory     • Forgetting Curve             │   │
+│  │  • Source Tracking (v2.1.0)                          │   │
 │  └─────────────────────────────────────────────────────┘   │
 ├─────────────────────────────────────────────────────────────┤
 │  Cognitive Modules (cognitive/)                             │
@@ -43,20 +52,83 @@ MemoryCoreClaw is a human-brain-inspired memory system for AI agents. It impleme
 │  ┌────────────┐ ┌────────────┐                             │
 │  │  Semantic  │ │  Ontology  │                             │
 │  │   Search   │ │   Engine   │                             │
+│  │ (v2.1.0:   │ │            │                             │
+│  │  健康检查) │ │            │                             │
 │  └────────────┘ └────────────┘                             │
 ├─────────────────────────────────────────────────────────────┤
-│  Storage (storage/)                                         │
-│  ┌────────────┐ ┌────────────┐                             │
-│  │  Database  │ │ Multimodal │                             │
-│  │  (SQLite)  │ │  Storage   │                             │
-│  └────────────┘ └────────────┘                             │
+│  Storage (storage/) - v2.1.0 增强                           │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐             │
+│  │  Database  │ │ Multimodal │ │   Safe     │             │
+│  │  Manager   │ │  Storage   │ │  Database  │             │
+│  │            │ │            │ │  Manager   │             │
+│  └────────────┘ └────────────┘ └────────────┘             │
+│  ┌────────────┐                                             │
+│  │  Health    │                                             │
+│  │  Checker   │                                             │
+│  └────────────┘                                             │
 ├─────────────────────────────────────────────────────────────┤
 │  Utils (utils/)                                             │
-│  ┌────────────┐ ┌────────────┐                             │
-│  │   Export   │ │Visualization│                            │
-│  │   Import   │ │   (HTML)    │                            │
-│  └────────────┘ └────────────┘                             │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐             │
+│  │   Export   │ │Visualization│ │  GitHub   │             │
+│  │   Import   │ │   (HTML)    │ │   API     │             │
+│  └────────────┘ └────────────┘ └────────────┘             │
+├─────────────────────────────────────────────────────────────┤
+│  Scripts (scripts/) - v2.1.0 新增                           │
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐             │
+│  │  check_    │ │  optimize_ │ │    sync_   │             │
+│  │  memory    │ │  database  │ │  to_md     │             │
+│  └────────────┘ └────────────┘ └────────────┘             │
 └─────────────────────────────────────────────────────────────┘
+```
+
+## v2.1.0 新增模块
+
+### SafeDatabaseManager
+
+线程安全的数据库管理器：
+
+```python
+from memorycoreclaw.storage.database import SafeDatabaseManager
+
+db = SafeDatabaseManager("memory.db")
+
+# 事务操作（自动提交/回滚）
+with db.transaction() as cursor:
+    cursor.execute("INSERT INTO facts ...")
+    # 异常时自动回滚
+
+# 只读操作
+with db.readonly() as cursor:
+    cursor.execute("SELECT ...")
+```
+
+**特性：**
+- 单例模式：同一数据库路径共享连接
+- 线程安全：每个线程独立连接
+- WAL 模式：提升并发性能
+
+### MemoryHealthChecker
+
+数据库健康检查：
+
+```python
+from memorycoreclaw.storage.database import MemoryHealthChecker
+
+checker = MemoryHealthChecker(db_path)
+report = checker.check()
+# {'status': 'healthy', 'stats': {...}, 'issues': []}
+```
+
+### Source Tracking
+
+记忆来源追踪：
+
+```python
+mem.remember(
+    "重要信息",
+    source="user",           # user/llm/document/system
+    source_confidence=1.0    # 来源置信度
+)
 ```
 
 ## Database Schema
@@ -67,7 +139,8 @@ MemoryCoreClaw is a human-brain-inspired memory system for AI agents. It impleme
 -- Facts (what you know)
 facts (
     id, content, importance, category, 
-    emotion, tags, created_at, last_accessed, access_count
+    emotion, tags, created_at, last_accessed, access_count,
+    source, source_confidence  -- v2.1.0 新增
 )
 
 -- Experiences (lessons learned)

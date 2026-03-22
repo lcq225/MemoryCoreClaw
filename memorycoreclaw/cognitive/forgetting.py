@@ -36,15 +36,18 @@ class ForgettingCurve:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
+        # 使用与 engine.py 一致的表结构
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS memory_strength (
-                memory_id INTEGER PRIMARY KEY,
-                memory_type TEXT DEFAULT 'fact',
+                memory_type TEXT NOT NULL,
+                memory_id INTEGER NOT NULL,
                 base_strength REAL DEFAULT 0.5,
                 current_strength REAL DEFAULT 0.5,
-                last_accessed TIMESTAMP,
                 access_count INTEGER DEFAULT 0,
-                decay_rate REAL DEFAULT 0.1
+                last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_decay TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                retention_rate REAL DEFAULT 1.0,
+                PRIMARY KEY (memory_type, memory_id)
             )
         ''')
         

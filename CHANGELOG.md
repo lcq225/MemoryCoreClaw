@@ -5,6 +5,41 @@ All notable changes to MemoryCoreClaw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-03-22
+
+### Added
+- **Safety-First Memory Operations**
+  - `SafeMemory` class with connection management and transaction protection
+  - Boundary checking for limit parameters
+  - Core memory deletion protection with force flag
+  - Automatic parameter validation and correction
+- **Source Tracking**
+  - Memory source attribution (user/llm/document/system)
+  - Source confidence scoring
+  - Provenance chain for memory origins
+- **Health Check & Maintenance Scripts**
+  - `check_memory.py` - Database status inspection
+  - `optimize_database.py` - Clean, repair, and enhance database
+  - `auto_check.py` - Scheduled health monitoring
+  - `check_duplicates.py` - Detect duplicate memories
+  - `remove_duplicates.py` - Safe duplicate removal
+- **Utility Scripts**
+  - `sync_to_memory_md.py` - Export to human-readable format
+  - `record_session_lessons.py` - Capture lessons from sessions
+  - `create_entities_for_relations.py` - Auto-create entities from relations
+- **GitHub API Integration**
+  - `github_api.py` - Safe GitHub operations with SSL handling
+
+### Changed
+- Enhanced `MemoryEngine` with source tracking support
+- Improved database operations with automatic cleanup
+- Better error handling and recovery
+
+### Fixed
+- Parameter boundary issues in recall operations
+- Memory strength initialization consistency
+- Entity-relation integrity
+
 ## [2.0.0] - 2026-03-20
 
 ### Added

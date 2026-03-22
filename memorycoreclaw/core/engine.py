@@ -152,13 +152,14 @@ class MemoryEngine:
             CREATE TABLE IF NOT EXISTS facts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 content TEXT NOT NULL,
-                importance REAL DEFAULT 0.5,
-                category TEXT DEFAULT 'general',
-                emotion TEXT DEFAULT 'neutral',
                 tags TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                importance REAL DEFAULT 0.5,
+                emotion TEXT DEFAULT 'neutral',
+                category TEXT DEFAULT 'general',
                 last_accessed TIMESTAMP,
-                access_count INTEGER DEFAULT 0
+                access_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP
             )
         ''')
         
@@ -183,9 +184,13 @@ class MemoryEngine:
             CREATE TABLE IF NOT EXISTS entities (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT UNIQUE NOT NULL,
-                entity_type TEXT,
+                type TEXT,
                 metadata TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                importance REAL DEFAULT 0.5,
+                last_accessed TIMESTAMP,
+                access_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP
             )
         ''')
         
@@ -204,16 +209,18 @@ class MemoryEngine:
         ''')
         
         # Memory strength table (for forgetting curve)
+        # Note: Using base_strength (matching actual DB schema)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS memory_strength (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 memory_type TEXT NOT NULL,
                 memory_id INTEGER NOT NULL,
-                initial_strength REAL DEFAULT 0.5,
+                base_strength REAL DEFAULT 0.5,
                 current_strength REAL DEFAULT 0.5,
-                last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 access_count INTEGER DEFAULT 0,
-                UNIQUE(memory_type, memory_id)
+                last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_decay TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                retention_rate REAL DEFAULT 1.0,
+                PRIMARY KEY (memory_type, memory_id)
             )
         ''')
         
@@ -221,11 +228,22 @@ class MemoryEngine:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS contexts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                context_hash TEXT,
+                time TEXT,
+                time_period TEXT,
+                date TEXT,
+                weekday TEXT,
                 location TEXT,
+                location_type TEXT,
                 people TEXT,
                 emotion TEXT,
+                emotion_intensity REAL,
                 activity TEXT,
+                topic TEXT,
+                weather TEXT,
+                environment TEXT,
                 channel TEXT,
+                session_id TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -237,7 +255,8 @@ class MemoryEngine:
                 memory_type TEXT NOT NULL,
                 memory_id INTEGER NOT NULL,
                 context_id INTEGER NOT NULL,
-                match_score REAL DEFAULT 1.0,
+                binding_strength REAL DEFAULT 1.0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (context_id) REFERENCES contexts(id)
             )
         ''')
@@ -254,6 +273,8 @@ class MemoryEngine:
                 expires_at TIMESTAMP,
                 last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 access_count INTEGER DEFAULT 0,
+                ttl_seconds INTEGER,
+                tags TEXT,
                 UNIQUE(session_id, key)
             )
         ''')
@@ -303,8 +324,8 @@ class MemoryEngine:
         
         # Initialize memory strength
         cursor.execute('''
-            INSERT INTO memory_strength (memory_type, memory_id, initial_strength, current_strength)
-            VALUES ('fact', ?, ?, ?)
+            INSERT INTO memory_strength (memory_type, memory_id, base_strength, current_strength, last_decay)
+            VALUES ('fact', ?, ?, ?, datetime('now'))
         ''', (fact_id, importance, importance))
         
         conn.commit()
@@ -377,6 +398,82 @@ class MemoryEngine:
             }
         return None
     
+    def recall_by_category(self, category: str, limit: int = 20) -> List[Dict]:
+        """
+        Search for facts by category.
+        
+        Args:
+            category: Category to filter by
+            limit: Maximum results
+            
+        Returns:
+            List of matching facts
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, content, importance, category, emotion, tags, created_at
+            FROM facts
+            WHERE category = ?
+            ORDER BY importance DESC
+            LIMIT ?
+        ''', (category, limit))
+        
+        results = []
+        for row in cursor.fetchall():
+            results.append({
+                'id': row[0],
+                'content': row[1],
+                'importance': row[2],
+                'category': row[3],
+                'emotion': row[4],
+                'tags': json.loads(row[5]) if row[5] else [],
+                'created_at': row[6]
+            })
+            self._record_access('fact', row[0])
+        
+        conn.close()
+        return results
+    
+    def recall_by_importance(self, min_importance: float = 0.7, limit: int = 20) -> List[Dict]:
+        """
+        Search for facts by minimum importance.
+        
+        Args:
+            min_importance: Minimum importance threshold
+            limit: Maximum results
+            
+        Returns:
+            List of matching facts
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, content, importance, category, emotion, tags, created_at
+            FROM facts
+            WHERE importance >= ?
+            ORDER BY importance DESC
+            LIMIT ?
+        ''', (min_importance, limit))
+        
+        results = []
+        for row in cursor.fetchall():
+            results.append({
+                'id': row[0],
+                'content': row[1],
+                'importance': row[2],
+                'category': row[3],
+                'emotion': row[4],
+                'tags': json.loads(row[5]) if row[5] else [],
+                'created_at': row[6]
+            })
+            self._record_access('fact', row[0])
+        
+        conn.close()
+        return results
+    
     def delete_fact(self, fact_id: int) -> bool:
         """Delete a fact"""
         conn = sqlite3.connect(self.db_path)
@@ -427,8 +524,8 @@ class MemoryEngine:
         
         # Initialize strength
         cursor.execute('''
-            INSERT INTO memory_strength (memory_type, memory_id, initial_strength, current_strength)
-            VALUES ('experience', ?, ?, ?)
+            INSERT INTO memory_strength (memory_type, memory_id, base_strength, current_strength, last_decay)
+            VALUES ('experience', ?, ?, ?, datetime('now'))
         ''', (lesson_id, importance, importance))
         
         conn.commit()
@@ -526,19 +623,6 @@ class MemoryEngine:
         
         conn.close()
         return results
-    
-    def delete_fact(self, fact_id: int) -> bool:
-        """Delete a fact by ID"""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM facts WHERE id = ?', (fact_id,))
-        cursor.execute('DELETE FROM memory_strength WHERE memory_type = ? AND memory_id = ?',
-                       ('fact', fact_id))
-        cursor.execute('DELETE FROM memory_context_bindings WHERE memory_type = ? AND memory_id = ?',
-                       ('fact', fact_id))
-        conn.commit()
-        conn.close()
-        return True
     
     def update_fact(self, fact_id: int, **kwargs) -> bool:
         """Update a fact"""
@@ -846,7 +930,7 @@ class MemoryEngine:
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT initial_strength, current_strength
+            SELECT base_strength, current_strength
             FROM memory_strength
             WHERE memory_type = ? AND memory_id = ?
         ''', (memory_type, memory_id))
@@ -854,9 +938,9 @@ class MemoryEngine:
         row = cursor.fetchone()
         
         if row:
-            initial, current = row
-            # Strengthen by 10%, capped at initial
-            new_strength = min(current * 1.1, initial)
+            base_strength, current = row
+            # Strengthen by 10%, capped at base_strength
+            new_strength = min(current * 1.1, base_strength)
             
             cursor.execute('''
                 UPDATE memory_strength

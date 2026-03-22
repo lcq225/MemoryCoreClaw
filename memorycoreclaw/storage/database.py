@@ -175,8 +175,18 @@ class MemoryHealthChecker:
     解决 I1: 自我健康检查
     """
     
-    def __init__(self, db: SafeDatabaseManager):
-        self.db = db
+    def __init__(self, db):
+        """
+        初始化健康检查器
+        
+        Args:
+            db: SafeDatabaseManager 对象或数据库路径字符串
+        """
+        if isinstance(db, str):
+            # 如果传入的是字符串路径，创建 SafeDatabaseManager
+            self.db = SafeDatabaseManager(db)
+        else:
+            self.db = db
     
     def check(self) -> Dict[str, Any]:
         """

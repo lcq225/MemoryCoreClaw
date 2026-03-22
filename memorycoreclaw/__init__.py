@@ -1,7 +1,7 @@
 # MemoryCoreClaw
 # Human-brain-inspired Long-term Memory Engine for AI Agents
 
-__version__ = "1.1.0"  # 版本升级，包含安全修复
+__version__ = "2.1.0"  # v2.1.0 - Safety enhancements and maintenance tools
 __author__ = "MemoryCoreClaw Team"
 
 from .core.memory import Memory, get_memory

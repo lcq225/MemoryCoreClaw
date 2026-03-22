@@ -25,11 +25,6 @@ MemoryCoreClaw - Safe Memory Engine Wrapper
     mem.delete(1, force=True)  # 强制删除
 """
 
-import sys
-import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
-
 from typing import List, Dict, Optional, Any
 from datetime import datetime
 import sqlite3
@@ -87,7 +82,117 @@ class SafeMemory:
         """
         self.db = SafeDatabaseManager(db_path)
         self.health_checker = MemoryHealthChecker(self.db)
+        self._init_tables()  # 确保表存在
         self._ensure_source_column()
+    
+    def _init_tables(self):
+        """初始化数据库表结构"""
+        self.db.execute_script('''
+            CREATE TABLE IF NOT EXISTS facts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL,
+                tags TEXT,
+                importance REAL DEFAULT 0.5,
+                emotion TEXT DEFAULT 'neutral',
+                category TEXT DEFAULT 'general',
+                source TEXT DEFAULT 'user',
+                source_confidence REAL DEFAULT 1.0,
+                last_accessed TIMESTAMP,
+                access_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP
+            );
+            
+            CREATE TABLE IF NOT EXISTS experiences (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                action TEXT NOT NULL,
+                context TEXT,
+                outcome TEXT CHECK(outcome IN ('positive', 'negative', 'neutral')),
+                insight TEXT,
+                importance REAL DEFAULT 0.5,
+                category TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_accessed TIMESTAMP,
+                access_count INTEGER DEFAULT 0
+            );
+            
+            CREATE TABLE IF NOT EXISTS entities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                type TEXT,
+                metadata TEXT,
+                importance REAL DEFAULT 0.5,
+                last_accessed TIMESTAMP,
+                access_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP
+            );
+            
+            CREATE TABLE IF NOT EXISTS relations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                from_entity TEXT NOT NULL,
+                relation_type TEXT NOT NULL,
+                to_entity TEXT NOT NULL,
+                weight REAL DEFAULT 1.0,
+                evidence TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(from_entity, relation_type, to_entity)
+            );
+            
+            CREATE TABLE IF NOT EXISTS memory_strength (
+                memory_type TEXT NOT NULL,
+                memory_id INTEGER NOT NULL,
+                base_strength REAL DEFAULT 0.5,
+                current_strength REAL DEFAULT 0.5,
+                access_count INTEGER DEFAULT 0,
+                last_accessed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_decay TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                retention_rate REAL DEFAULT 1.0,
+                PRIMARY KEY (memory_type, memory_id)
+            );
+            
+            CREATE TABLE IF NOT EXISTS contexts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                context_hash TEXT,
+                time TEXT,
+                time_period TEXT,
+                date TEXT,
+                weekday TEXT,
+                location TEXT,
+                location_type TEXT,
+                people TEXT,
+                emotion TEXT,
+                emotion_intensity REAL,
+                activity TEXT,
+                topic TEXT,
+                weather TEXT,
+                environment TEXT,
+                channel TEXT,
+                session_id TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE TABLE IF NOT EXISTS memory_context_bindings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                memory_type TEXT NOT NULL,
+                memory_id INTEGER NOT NULL,
+                context_id INTEGER NOT NULL,
+                binding_strength REAL DEFAULT 1.0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (context_id) REFERENCES contexts(id)
+            );
+            
+            CREATE TABLE IF NOT EXISTS working_memory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                session_id TEXT DEFAULT 'default',
+                key TEXT NOT NULL,
+                value TEXT,
+                priority REAL DEFAULT 0.5,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_accessed TIMESTAMP,
+                UNIQUE(session_id, key)
+            );
+        ''')
     
     def _ensure_source_column(self):
         """确保 facts 表有 source 列"""

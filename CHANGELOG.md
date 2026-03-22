@@ -5,6 +5,22 @@ All notable changes to MemoryCoreClaw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-03-22
+
+### Changed
+- Added PyPI badge to README.md and README_zh.md
+- Updated documentation with detailed bug fix information
+- Added functional verification test (`test_v210.py`) to repository
+
+### Fixed
+- **SafeMemory initialization** - Added `_init_tables()` to ensure database schema exists before operations
+- **MemoryHealthChecker path support** - Now accepts both string path and SafeDatabaseManager object
+- **Windows encoding issues** - Removed temporary UTF-8 encoding overrides from semantic.py and safe_memory.py
+
+### PyPI
+- Published to PyPI: https://pypi.org/project/memorycoreclaw/2.1.1/
+- Install: `pip install memorycoreclaw`
+
 ## [2.1.0] - 2026-03-22
 
 ### Added

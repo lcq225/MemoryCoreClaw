@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `create_entities_for_relations.py` - Auto-create entities from relations
 - **GitHub API Integration**
   - `github_api.py` - Safe GitHub operations with SSL handling
+- **Functional Verification Test**
+  - `test_v210.py` - Comprehensive test suite for v2.1.0 features
 
 ### Changed
 - Enhanced `MemoryEngine` with source tracking support
@@ -39,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parameter boundary issues in recall operations
 - Memory strength initialization consistency
 - Entity-relation integrity
+- **SafeMemory initialization** - Added `_init_tables()` to ensure database schema exists before operations
+- **MemoryHealthChecker path support** - Now accepts both string path and SafeDatabaseManager object
+- **Windows encoding issues** - Removed temporary UTF-8 encoding overrides from semantic.py and safe_memory.py
+
+### PyPI
+- Published to PyPI: https://pypi.org/project/memorycoreclaw/2.1.0/
+- Install: `pip install memorycoreclaw`
 
 ## [2.0.0] - 2026-03-20
 

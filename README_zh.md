@@ -3,6 +3,7 @@
 > 类人脑长期记忆引擎，为 AI Agent 提供持久化记忆能力
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI version](https://img.shields.io/pypi/v/memorycoreclaw.svg)](https://pypi.org/project/memorycoreclaw/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub release](https://img.shields.io/github/v/release/lcq225/MemoryCoreClaw.svg)](https://github.com/lcq225/MemoryCoreClaw/releases)
 

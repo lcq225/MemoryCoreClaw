@@ -5,6 +5,26 @@ All notable changes to MemoryCoreClaw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-03-24
+
+### Added
+- **Associative Memory Module** (`memorycoreclaw.cognitive.associative`)
+  - `AssociativeMemory` class for human-like memory patterns
+  - `diverge()` - Spreading activation from one entity (发散记忆)
+  - `converge()` - Multiple clues aggregating to core entity (聚合记忆)
+  - `smart_recall()` - Auto-choose between diverge/converge based on query
+  - `ActivatedNode` and `ConvergenceResult` dataclasses
+  - Configurable relation weights for spreading activation
+
+### Changed
+- Enhanced `check_memory.py` with detailed output and environment variable support
+- Use `MEMORY_DB_PATH` environment variable for database path in scripts
+
+### Technical Details
+- Divergent memory uses BFS with exponential decay (0.7^depth)
+- Convergent memory aggregates evidence from multiple clues
+- Relation weights configurable via `RELATION_WEIGHTS` dict
+
 ## [2.1.1] - 2026-03-22
 
 ### Changed

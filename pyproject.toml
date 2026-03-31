@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memorycoreclaw"
-version = "2.2.0"
+version = "2.3.0"
 description = "A human-like memory engine for AI applications with safety enhancements"
 readme = "README.md"
 license = "MIT"

@@ -17,11 +17,11 @@ today = datetime.now().strftime('%Y-%m-%d')
 
 # 今日重要事实记忆
 facts = [
-    ('project', f'海科扩展模块创建 - src/copaw/extensions/haike/ 目录，包含技能效用追踪钩子和记忆增强工具函数', 0.8, today),
+    ('project', f'Enterprise extension module created - src/copaw/extensions/enterprise/ 目录，包含技能效用追踪钩子和记忆增强工具函数', 0.8, today),
     ('github', f'GitHub Issue #2215 提交 - Feature Request: memory_compact_skip_summary 配置选项', 0.7, today),
     ('github', f'GitHub Issue #2216 提交 - Feature Request: Skill/Tool Execution Tracking 功能', 0.7, today),
     ('decision', f'核心代码修改策略决策 - 暂时保留侵入式修改，等待官方 Issue 回复，等 v0.3.0 时再论证', 0.9, today),
-    ('warning', f'安装包版本问题 - 当前安装包使用官方 v0.2.0，不含海科定制代码修改', 0.7, today),
+    ('warning', f'安装包版本问题 - 当前安装包使用官方 v0.2.0，without enterprise custom code modifications', 0.7, today),
 ]
 
 # 今日经验教训

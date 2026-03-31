@@ -498,7 +498,7 @@ if __name__ == "__main__":
     
     # Test search
     print(f"\n🔍 Testing search...")
-    results = search.search("海科", limit=3)
+    results = search.search("company", limit=3)
     
     print(f"\n   Found {len(results)} results:")
     for r in results:

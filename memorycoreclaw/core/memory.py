@@ -1,4 +1,4 @@
-"""
+﻿"""
 MemoryCoreClaw - Unified Memory Interface
 
 Simple API for human-brain-inspired memory management.
@@ -282,7 +282,7 @@ class Memory:
         Divergent memory: Spread activation from a seed entity.
         
         Activates the entire knowledge network from one trigger point.
-        Like human memory: "海科" → Mr Lee, 东营, 化工...
+        Like human memory: "Enterprise" → Mr Lee, 东营, 化工...
         
         Args:
             seed: Starting entity

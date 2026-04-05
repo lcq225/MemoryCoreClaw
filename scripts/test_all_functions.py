@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 MemoryCoreClaw 功能完整性测试
 测试所有核心功能：读取、写入、删除、更新、搜索、关系、情境、工作记忆、可视化
@@ -13,11 +13,11 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # 设置路径
-sys.path.insert(0, r"D:\CoPaw\.copaw\workspaces\default\active_skills")
+sys.path.insert(0, r"active_skills")
 
 from memorycoreclaw import Memory
 
-DB_PATH = r"D:\CoPaw\.copaw\.agent-memory\memory.db"
+DB_PATH = r"memory.db"
 
 # 测试结果
 results = []

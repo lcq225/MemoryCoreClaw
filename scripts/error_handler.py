@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 全局错误处理中心 - 统一捕获、自动恢复、智能汇报
 为整个技能系统提供稳定的错误处理能力
@@ -18,8 +18,8 @@ from functools import wraps
 from pathlib import Path
 
 # 配置
-MEMORY_DB = r"D:\CoPaw\.copaw\.agent-memory\memory.db"
-ERROR_LOG = r"D:\CoPaw\.copaw\error_log.json"
+MEMORY_DB = r"memory.db"
+ERROR_LOG = r"error_log.json"
 
 
 class ErrorHandler:

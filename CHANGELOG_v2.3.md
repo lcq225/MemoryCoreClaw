@@ -290,4 +290,4 @@ MIT License - 查看 [LICENSE](LICENSE) 文件
 
 **版本：** v2.3.0  
 **发布日期：** 2026-04-01  
-**作者：** Mr Lee
+**作者：** User A

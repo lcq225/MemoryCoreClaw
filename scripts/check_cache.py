@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import sys
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 import sqlite3
-conn = sqlite3.connect(r'D:\CoPaw\.copaw\.agent-memory\memory.db')
+conn = sqlite3.connect('memory.db')  # 使用相对路径
 cursor = conn.cursor()
 
 cursor.execute('SELECT COUNT(*) FROM embedding_cache')

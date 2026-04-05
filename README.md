@@ -68,6 +68,25 @@ Based on the Ebbinghaus forgetting curve model:
 - **Statistics Report** - Memory count, categories, relation types visualization
 - **Memory Browser** - Searchable facts/lessons/relations list
 
+### 🔌 Plugin System (New in v2.4.0)
+
+- **StoragePlugin** - Custom storage backends (e.g., PostgreSQL, MongoDB)
+- **RetrievalPlugin** - Custom retrieval strategies (e.g., BM25, Hybrid)
+- **CognitivePlugin** - Custom cognitive models (e.g., emotion analysis)
+- **CompressionPlugin** - Custom memory compression algorithms
+
+### 🎯 Reranker Service (New in v2.4.0)
+
+- **Semantic Reranking** - Re-rank search results for better relevance
+- **Multi-provider Support** - GiteeAI Qwen3-Reranker, custom models
+- **Easy Integration** - `search_with_rerank()` method
+
+### 🛡️ Safe Operations (New in v2.4.0)
+
+- **SafeMemory** - Safe wrapper with operation validation
+- **SafeDatabaseManager** - SQL injection prevention
+- **MemoryHealthChecker** - Database health monitoring
+
 #### Screenshots
 
 **Knowledge Graph:**

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 技能协同分析器 - 检查技能之间的协作关系
 """
@@ -15,8 +15,8 @@ from typing import Dict, List, Set
 
 # 技能根目录（支持多位置）
 SKILLS_ROOTS = [
-    r"D:\CoPaw\.copaw\workspaces\default\active_skills",  # 工作区
-    r"D:\CoPaw\.copaw\active_skills",  # 全局
+    r"active_skills",  # 工作区
+    r"active_skills",  # 全局
 ]
 
 # 技能分类

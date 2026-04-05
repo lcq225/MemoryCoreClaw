@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import sys
 import io
 import sqlite3
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-conn = sqlite3.connect(r"D:\CoPaw\.copaw\.agent-memory\memory.db")
+conn = sqlite3.connect(r"memory.db")
 cursor = conn.cursor()
 
 # 检查 working_memory 表结构

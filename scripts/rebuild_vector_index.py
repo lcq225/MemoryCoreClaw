@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 重建向量索引（直接调用 API，不依赖缓存）
 """
@@ -7,7 +7,7 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-sys.path.insert(0, r'D:\CoPaw\.copaw\active_skills')
+sys.path.insert(0, r'active_skills')
 
 print('=' * 70)
 print('                    重建向量索引')
@@ -20,7 +20,7 @@ import struct
 import time
 import hashlib
 
-db_path = r'D:\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = r'memory.db'
 
 # Embedding API 配置
 EMBEDDING_URL = 'http://127.0.0.1:11434/v1/embeddings'

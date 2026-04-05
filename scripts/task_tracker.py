@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 任务追踪系统 - 确保任务闭环执行
 为每个任务提供状态管理、进度追踪、结果验证
@@ -18,8 +18,8 @@ from dataclasses import dataclass, asdict
 from functools import wraps
 
 # 配置
-MEMORY_DB = r"D:\CoPaw\.copaw\.agent-memory\memory.db"
-TASK_DB = r"D:\CoPaw\.copaw\tasks.db"
+MEMORY_DB = r"memory.db"
+TASK_DB = r"tasks.db"
 
 
 class TaskStatus(Enum):

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 记忆清理脚本
 
@@ -11,7 +11,7 @@
     python cleanup_memory.py [--db-path PATH] [--dry-run]
     
 参数：
-    --db-path: 数据库路径（默认：D:\CoPaw\.copaw\.agent-memory\memory.db）
+    --db-path: 数据库路径（默认：memory.db）
     --dry-run: 仅显示将要清理的内容，不实际删除
 """
 import argparse
@@ -167,7 +167,7 @@ def cleanup_memory(db_path: str, dry_run: bool = False) -> dict:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='记忆清理脚本')
-    parser.add_argument('--db-path', default=r'D:\CoPaw\.copaw\.agent-memory\memory.db', help='数据库路径')
+    parser.add_argument('--db-path', default=r'memory.db', help='数据库路径')
     parser.add_argument('--dry-run', action='store_true', help='仅模拟运行，不实际删除')
     
     args = parser.parse_args()

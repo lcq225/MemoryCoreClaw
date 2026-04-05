@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 智能复习提醒 - 根据遗忘曲线主动提醒需要复习的记忆
 
@@ -18,7 +18,7 @@ from typing import List, Dict, Optional
 from dataclasses import dataclass
 
 # 数据库路径
-DB_PATH = r"D:\CoPaw\.copaw\.agent-memory\memory.db"
+DB_PATH = r"memory.db"
 
 
 @dataclass

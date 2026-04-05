@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 向量索引维护脚本
 
@@ -16,7 +16,7 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-sys.path.insert(0, r'D:\CoPaw\.copaw\active_skills')
+sys.path.insert(0, r'active_skills')
 
 print('=' * 70)
 print('                    向量索引维护')

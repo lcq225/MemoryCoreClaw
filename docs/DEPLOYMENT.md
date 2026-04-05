@@ -209,7 +209,7 @@ import sys
 sys.path.insert(0, 'active_skills')
 from memorycoreclaw import Memory
 
-mem = Memory(db_path=r"D:\CoPaw\.copaw\.agent-memory\memory.db")
+mem = Memory(db_path=r"memory.db")
 
 # 记住用户偏好
 mem.remember("用户喜欢简洁的回复", importance=0.85, category="preference")

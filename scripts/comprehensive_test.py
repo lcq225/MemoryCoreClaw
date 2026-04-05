@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 MemoryCoreClaw 综合功能验证测试
 """
 import sys
-sys.path.insert(0, r'D:\CoPaw\.copaw\active_skills')
+sys.path.insert(0, r'active_skills')
 
 print('=' * 70)
 print('       MemoryCoreClaw v1.1.0 综合功能验证测试')

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 记录本次会话的关键记忆
 """
@@ -6,11 +6,11 @@ import sys
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-sys.path.insert(0, r'D:\CoPaw\.copaw\active_skills')
+sys.path.insert(0, r'active_skills')
 
 from memorycoreclaw import Memory
 
-mem = Memory(db_path=r'D:\CoPaw\.copaw\.agent-memory\memory.db')
+mem = Memory(db_path=r'memory.db')
 
 # 记录 Embedding 向量索引功能
 mem.remember(

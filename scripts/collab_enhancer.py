@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 主动协作增强器 - 主动汇报、确认执行、智能提醒
 提升与User A协作的效率和体验
@@ -17,8 +17,8 @@ from enum import Enum
 from dataclasses import dataclass
 
 # 配置
-MEMORY_DB = r"D:\CoPaw\.copaw\.agent-memory\memory.db"
-WORKSPACE = r"D:\CoPaw\.copaw\workspaces\default"
+MEMORY_DB = r"memory.db"
+WORKSPACE = r"."
 
 
 class CollaborationMode(Enum):
@@ -206,7 +206,7 @@ class CollaborationEnhancer:
     
     def check_incomplete_tasks(self) -> List[Dict]:
         """检查未完成的任务"""
-        TASK_DB = r"D:\CoPaw\.copaw\tasks.db"
+        TASK_DB = r"tasks.db"
         
         if not os.path.exists(TASK_DB):
             return []

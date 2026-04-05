@@ -22,8 +22,8 @@ print('-' * 70)
 
 # 1.1 记忆检索
 print('  1.1 记忆检索测试...')
-results = mem.recall('Mr Lee', limit=5)
-print('      检索 "Mr Lee": ' + str(len(results)) + ' 条结果')
+results = mem.recall('User A', limit=5)
+print('      检索 "User A": ' + str(len(results)) + ' 条结果')
 if results:
     print('      首条: ' + results[0]['content'][:50] + '...')
 
@@ -45,23 +45,23 @@ print('')
 print('[2] 关系网络测试')
 print('-' * 70)
 
-# 获取 Mr Lee 的关系
-relations = mem.get_relations('Mr Lee')
-print('  Mr Lee 的关系网络:')
+# 获取 User A 的关系
+relations = mem.get_relations('User A')
+print('  User A 的关系网络:')
 for r in relations[:5]:
-    if r['from_entity'] == 'Mr Lee':
-        print('      Mr Lee --[' + r['relation_type'] + ']--> ' + r['to_entity'])
+    if r['from_entity'] == 'User A':
+        print('      User A --[' + r['relation_type'] + ']--> ' + r['to_entity'])
     else:
-        print('      ' + r['from_entity'] + ' --[' + r['relation_type'] + ']--> Mr Lee')
+        print('      ' + r['from_entity'] + ' --[' + r['relation_type'] + ']--> User A')
 
 # ============ 3. 发散/聚合记忆测试 ============
 print('')
 print('[3] 发散/聚合记忆测试')
 print('-' * 70)
 
-print('  3.1 发散记忆 (从 Mr Lee 发散)...')
+print('  3.1 发散记忆 (从 User A 发散)...')
 try:
-    divergent = mem.diverge('Mr Lee', max_depth=2, limit=10)
+    divergent = mem.diverge('User A', max_depth=2, limit=10)
     print('      发散结果: ' + str(len(divergent)) + ' 个相关实体')
     for item in divergent[:5]:
         print('        - ' + item['entity'] + ' (score=' + str(round(item['score'], 3)) + ')')
@@ -140,7 +140,7 @@ print('-' * 70)
 # 检索性能
 start = time.time()
 for _ in range(100):
-    mem.recall('Mr Lee', limit=5)
+    mem.recall('User A', limit=5)
 elapsed = time.time() - start
 print('  100次检索耗时: ' + str(round(elapsed, 3)) + ' 秒')
 print('  平均每次: ' + str(round(elapsed/100*1000, 2)) + ' 毫秒')

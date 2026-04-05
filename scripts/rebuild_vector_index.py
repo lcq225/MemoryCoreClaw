@@ -168,7 +168,7 @@ emb = EmbeddingService(
 )
 search = SemanticSearch(db_path, emb)
 
-test_queries = ['海科', '进化', 'Mr Lee', '数据库']
+test_queries = ['Example', '进化', 'User A', '数据库']
 for q in test_queries:
     results = search.search(q, limit=2)
     if results:

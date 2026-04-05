@@ -282,7 +282,7 @@ class Memory:
         Divergent memory: Spread activation from a seed entity.
         
         Activates the entire knowledge network from one trigger point.
-        Like human memory: "Enterprise" → Mr Lee, 东营, 化工...
+        Like human memory: "Enterprise" → User A, City A, Industry...
         
         Args:
             seed: Starting entity
@@ -308,7 +308,7 @@ class Memory:
         """
         Convergent memory: Multiple clues aggregating to core entity.
         
-        Like human reasoning: "BLUF" + "IT" + "东营" → Mr Lee
+        Like human reasoning: "BLUF" + "IT" + "City A" → User A
         
         Args:
             clues: List of clue entities

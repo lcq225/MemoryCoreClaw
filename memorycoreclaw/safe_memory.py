@@ -15,7 +15,7 @@ MemoryCoreClaw - Safe Memory Engine Wrapper
     mem = SafeMemory(db_path)
     
     # 带来源的记忆存储
-    mem.remember("Mr Lee 喜欢高效沟通", source="user")
+    mem.remember("User A 喜欢高效沟通", source="user")
     
     # 带边界检查的检索
     results = mem.recall("", limit=-1)  # 自动修正为默认值

@@ -72,6 +72,6 @@ print('=' * 60)
 # 测试语义搜索
 print('')
 print('测试语义搜索:')
-results = search.search('海科化工', limit=3)
+results = search.search('Example Corp', limit=3)
 for r in results:
     print('  [' + r.search_type + '] ' + r.content[:40] + '...')

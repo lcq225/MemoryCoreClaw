@@ -122,7 +122,7 @@ def test_associate():
 def test_recall_by_context():
     """测试情境记忆"""
     mem = Memory(db_path=DB_PATH)
-    results = mem.recall_by_context(people=["Mr Lee"])
+    results = mem.recall_by_context(people=["User A"])
     # 没有绑定过情境记忆时返回空列表
     assert isinstance(results, list), f"情境记忆返回类型错误: {type(results)}"
 

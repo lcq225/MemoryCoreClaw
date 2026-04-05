@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 主动协作增强器 - 主动汇报、确认执行、智能提醒
-提升与Mr Lee协作的效率和体验
+提升与User A协作的效率和体验
 """
 import sys
 import io
@@ -55,22 +55,22 @@ class CollaborationEnhancer:
         
     def _load_user_profile(self) -> UserProfile:
         """加载用户画像"""
-        # 从记忆系统加载Mr Lee的信息
+        # 从记忆系统加载User A的信息
         try:
             conn = sqlite3.connect(MEMORY_DB)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
-            # 查找Mr Lee相关信息
+            # 查找User A相关信息
             cursor.execute('''
                 SELECT content, category FROM facts 
-                WHERE content LIKE '%Mr Lee%' OR content LIKE '%Lee%'
+                WHERE content LIKE '%User A%' OR content LIKE '%Lee%'
                 ORDER BY importance DESC LIMIT 20
             ''')
             
             profile = UserProfile(
                 user_id="HI2044",
-                name="Mr Lee",
+                name="User A",
                 communication_style="BLUF",
                 preferences={},
                 last_active=datetime.now().isoformat()
@@ -94,7 +94,7 @@ class CollaborationEnhancer:
         except Exception as e:
             return UserProfile(
                 user_id="HI2044",
-                name="Mr Lee",
+                name="User A",
                 communication_style="BLUF",
                 preferences={},
                 last_active=datetime.now().isoformat()
@@ -105,7 +105,7 @@ class CollaborationEnhancer:
         """
         格式化 BLUD 消息（结论先行）
         
-        Mr Lee 偏好：BLUF 沟通风格
+        User A 偏好：BLUF 沟通风格
         """
         parts = []
         

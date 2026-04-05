@@ -17,7 +17,7 @@ import sqlite3
 import pickle
 from memorycoreclaw.retrieval.semantic import EmbeddingService
 
-db_path = r'D:\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db'
 
 # 连接数据库
 conn = sqlite3.connect(db_path)

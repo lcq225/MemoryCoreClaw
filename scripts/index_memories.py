@@ -16,7 +16,7 @@ print('=' * 60)
 import sqlite3
 from memorycoreclaw.retrieval.semantic import SemanticSearch, EmbeddingService
 
-db_path = r'D:\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db'
 
 # 创建 embedding 服务
 emb = EmbeddingService(

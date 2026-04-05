@@ -355,6 +355,6 @@ class VectorIndexManager:
 def get_vector_manager(db_path: str = None, embedding_config: Dict = None) -> VectorIndexManager:
     """获取向量索引管理器实例"""
     if db_path is None:
-        db_path = r"D:\CoPaw\.copaw\.agent-memory\memory.db"
+        db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db"
     
     return VectorIndexManager(db_path, embedding_config)

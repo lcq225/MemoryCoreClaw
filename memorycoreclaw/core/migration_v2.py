@@ -183,7 +183,7 @@ def verify_migration(db_path: str):
 
 
 if __name__ == '__main__':
-    db_path = r"D:\CoPaw\.copaw\.agent-memory\memory.db"
+    db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db"
     
     # 执行迁移
     migrate_v2(db_path)

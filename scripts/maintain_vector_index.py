@@ -24,7 +24,7 @@ print('=' * 70)
 
 from memorycoreclaw.core.vector_index_manager import VectorIndexManager
 
-db_path = r'D:\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db'
 manager = VectorIndexManager(db_path)
 
 # 1. 健康检查

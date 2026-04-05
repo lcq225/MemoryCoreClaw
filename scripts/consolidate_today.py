@@ -9,7 +9,7 @@ from datetime import datetime
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-db_path = r'D:\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db'
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 

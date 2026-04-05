@@ -12,7 +12,7 @@ print('=' * 70)
 from memorycoreclaw import SafeMemory, Memory
 import time
 
-db_path = r'D:\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db'
 mem = SafeMemory(db_path)
 
 # ============ 1. 基础功能测试 ============

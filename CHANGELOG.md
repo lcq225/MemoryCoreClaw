@@ -5,6 +5,54 @@ All notable changes to MemoryCoreClaw will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.4.0] - 2026-04-05
+
+### Added
+- **Plugin Architecture** (`memorycoreclaw.core.plugin_system`)
+  - `PluginRegistry` - Plugin lifecycle management
+  - `BasePlugin` - Abstract base class for all plugins
+  - `StoragePlugin` - Storage engine extension interface
+  - `RetrievalPlugin` - Retrieval engine extension interface
+  - `CognitivePlugin` - Cognitive module extension interface
+  - `CompressionPlugin` - Compression strategy extension interface
+  - Hot-pluggable design with dependency checking
+  - Configuration-driven plugin management
+
+- **Reranker Service** (`memorycoreclaw.retrieval.reranker`)
+  - `RerankerService` class for result re-ranking
+  - GiteeAI Qwen3-Reranker-8B integration
+  - `search_with_rerank()` method in SemanticSearch
+
+- **New Maintenance Scripts**
+  - `check_cache.py` - Check embedding cache status
+  - `check_db_structure.py` - Verify database schema
+  - `check_working_memory.py` - Working memory health check
+  - `comprehensive_test.py` - Full functionality test
+  - `error_handler.py` - Centralized error handling
+  - `generate_vectors.py` - Generate vectors for memories
+  - `index_memories.py` - Index memories for semantic search
+  - `list_indexed.py` - List indexed memories
+  - `maintain_vector_index.py` - Maintain vector index
+  - `rebuild_vector_index.py` - Rebuild vector index
+  - `record_session_memory.py` - Record session memory
+  - `test_all_functions.py` - Test all functions
+
+- **New Core Modules**
+  - `direct_compactor.py` - Direct memory compaction
+  - `enhanced_memory.py` - Enhanced memory operations
+  - `migration_v2.py` - Migration utilities
+  - `vector_index_manager.py` - Vector index management
+
+### Changed
+- Unified version across CoPaw local and GitHub
+- Updated author to "Mr.Lee & 老K"
+- Enhanced `__init__.py` with more exports
+
+### Technical Notes
+- LM Studio Embedding API confirmed working (1024 dimensions)
+- LM Studio Rerank API not supported (use GiteeAI instead)
+- Plugin system follows dependency injection pattern
 ## [2.2.0] - 2026-03-24
 
 ### Added

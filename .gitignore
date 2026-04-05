@@ -90,3 +90,12 @@ config/local.yaml
 
 # 发布临时文件
 RELEASE_NOTES.md 
+
+# Sensitive files (CRITICAL!)
+*.pypirc
+*.key
+*.pem
+_secret
+_token
+_credential
+_password

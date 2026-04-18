@@ -1,7 +1,7 @@
 # MemoryCoreClaw
 # Human-brain-inspired Long-term Memory Engine for AI Agents
 
-__version__ = "2.4.0"  # v2.4.0 - Plugin architecture + Reranker + More scripts
+__version__ = "2.5.0"  # v2.5.0 - Ontology built-in + Entity detection + Relation inference + Full desensitization
 __author__ = "Mr.Lee & 老K"
 
 from .core.memory import Memory, get_memory

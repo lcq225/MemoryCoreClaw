@@ -2,6 +2,11 @@
 """
 MemoryCoreClaw Plugin System
 
+⚠️ 状态：暂不需要（2026-04-16标记）
+原因：用户核心准则"适用实用不过度设计"，Ontology已内置化，Plugin系统暂不需要
+处理：保留代码，但不主动加载和使用
+如有需求：可在未来根据实际需求重新启用
+
 插件化架构，支持自定义：
 - 存储引擎（StoragePlugin）
 - 检索引擎（RetrievalPlugin）

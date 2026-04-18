@@ -818,5 +818,5 @@ class EnhancedMemoryEngine(MemoryEngine):
 def get_enhanced_memory(db_path: str = None) -> EnhancedMemoryEngine:
     """获取增强版记忆引擎实例"""
     if db_path is None:
-        db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db"
+        db_path = os.environ.get("MEMORY_DB_PATH", "memory.db")
     return EnhancedMemoryEngine(db_path)

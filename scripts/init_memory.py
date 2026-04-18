@@ -1,4 +1,4 @@
-﻿"""
+"""
 初始化记忆数据库示例脚本
 
 使用方法：
@@ -62,7 +62,7 @@ def init_database():
     
     env_facts = [
         ("操作系统是 Windows 11", 0.7, "environment"),
-        ("用户目录是 C:\\Users\\[用户名]", 0.8, "environment"),
+        ("用户目录是 /Users/[username]", 0.8, "environment"),
         ("文档库路径是 [文档路径]", 0.9, "environment"),
         ("Python 版本是 3.11", 0.6, "environment"),
         ("Node.js 版本是 v20.x", 0.6, "environment"),

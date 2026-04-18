@@ -12,7 +12,7 @@ print('=' * 70)
 from memorycoreclaw import SafeMemory, Memory
 import time
 
-db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = os.environ.get('MEMORY_DB_PATH', 'memory.db')
 mem = SafeMemory(db_path)
 
 # ============ 1. 基础功能测试 ============
@@ -70,7 +70,7 @@ except Exception as e:
 
 print('  3.2 聚合记忆 (多线索聚合)...')
 try:
-    convergent = mem.converge(['CoPaw项目', 'HiClaw'], limit=5)
+    convergent = mem.converge(['AI Project', 'Skill'], limit=5)
     print('      聚合结果: ' + str(len(convergent)) + ' 个候选')
     for item in convergent[:3]:
         print('        - ' + item['entity'] + ' (score=' + str(round(item['score'], 3)) + ')')

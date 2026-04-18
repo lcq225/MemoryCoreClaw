@@ -1,4 +1,4 @@
-﻿"""
+"""
 MemoryCoreClaw - Unified Memory Interface
 
 Simple API for human-brain-inspired memory management.
@@ -97,15 +97,29 @@ class Memory:
             self._associative = AssociativeMemory(self.core.db_path)
         return self._associative
     
+    @property
+    def ontology(self):
+        """Lazy load ontology integration engine (built-in)."""
+        if getattr(self, '_ontology', None) is None:
+            try:
+                # Ontology is now built-in to MemoryCoreClaw
+                from .ontology_integration import OntologyIntegration
+                self._ontology = OntologyIntegration(self.core.db_path)
+            except Exception as e:
+                self._ontology = None
+                # Ontology initialization failure should not affect memory storage
+        return self._ontology
+    
     # ==================== Core Operations ====================
     
     def remember(self, content: str, 
                  importance: float = 0.5,
                  category: str = "general",
                  emotion: str = "neutral",
-                 tags: Optional[List[str]] = None) -> int:
+                 tags: Optional[List[str]] = None,
+                 auto_ontology: bool = True) -> int:
         """
-        Store a fact in memory.
+        Store a fact in memory with automatic entity recognition and relation inference.
         
         Args:
             content: The fact content
@@ -113,21 +127,49 @@ class Memory:
             category: Memory category
             emotion: positive/negative/neutral/milestone
             tags: Optional tags for categorization
+            auto_ontology: Automatically detect entities and infer relations (default: True)
             
         Returns:
             Memory ID
         """
-        return self.core.remember(
+        fact_id = self.core.remember(
             content=content,
             importance=importance,
             category=category,
             emotion=emotion,
             tags=tags or []
         )
+        
+        # Auto-index for semantic search
+        try:
+            self.semantic.index('fact', fact_id, content)
+        except Exception:
+            pass  # Semantic indexing is optional
+        
+        # Auto-ontology: entity recognition and relation inference
+        if auto_ontology and self.ontology is not None:
+            try:
+                # Process content with ontology
+                result = self.ontology.process_content(content, source='memory')
+                
+                # Save high-confidence entities and relations
+                if result.get('entities') or result.get('relations'):
+                    save_result = self.ontology.save_to_database(result)
+                    
+                    # Log ontology processing (optional, can be disabled in production)
+                    if save_result.get('saved_entities', 0) > 0 or save_result.get('saved_relations', 0) > 0:
+                        # Silent success - don't interrupt user experience
+                        pass
+                        
+            except Exception:
+                # Ontology failure should not affect memory storage
+                pass
+        
+        return fact_id
     
-    def recall(self, query: str, limit: int = 5, use_semantic: bool = True) -> List[Dict[str, Any]]:
+    def recall(self, query: str, limit: int = 5, use_semantic: bool = True, include_entity_relations: bool = True) -> List[Dict[str, Any]]:
         """
-        Search memories by keyword or semantic similarity.
+        Search memories by keyword or semantic similarity with entity relation enhancement.
         
         Automatically uses semantic search when embedding service available,
         falls back to keyword search otherwise.
@@ -136,17 +178,19 @@ class Memory:
             query: Search query
             limit: Maximum results
             use_semantic: Whether to try semantic search first
+            include_entity_relations: Include memories related via entity network
             
         Returns:
             List of matching memories
         """
+        results = []
+        
         # Try semantic search first
         if use_semantic:
             try:
                 semantic_results = self.semantic.search(query, memory_type='fact', limit=limit)
                 if semantic_results:
                     # Convert SearchResult to dict format
-                    results = []
                     for r in semantic_results:
                         results.append({
                             'id': r.id,
@@ -156,12 +200,40 @@ class Memory:
                             'category': r.metadata.get('category', 'general'),
                             'search_type': r.search_type
                         })
-                    return results
             except Exception:
                 pass  # Fall through to keyword search
         
-        # Fallback to keyword search
-        results = self.core.recall(query, limit)
+        # Fallback to keyword search if semantic failed
+        if not results:
+            results = self.core.recall(query, limit)
+        
+        # Enhance with entity relation network
+        if include_entity_relations and self.ontology is not None and results:
+            try:
+                # Detect entities from query
+                entities = self.ontology.entity_detector.detect_entities(query)
+                
+                if entities:
+                    # Get relations for detected entities
+                    entity_names = [e.name for e in entities if e.confidence >= 0.75]
+                    
+                    if entity_names:
+                        # Find memories containing related entities
+                        for entity_name in entity_names[:3]:  # Limit to top 3 entities
+                            related_memories = self.core.recall(entity_name, limit=3)
+                            
+                            for rm in related_memories:
+                                # Avoid duplicates
+                                if rm['id'] not in [r['id'] for r in results]:
+                                    rm['search_type'] = 'entity_relation'
+                                    rm['related_entity'] = entity_name
+                                    results.append(rm)
+                
+                # Sort by importance and limit
+                results = sorted(results, key=lambda x: x.get('importance', 0.5), reverse=True)[:limit]
+                
+            except Exception:
+                pass  # Entity relation enhancement is optional
         
         # Enhance results with forgetting curve
         for r in results:
@@ -282,7 +354,7 @@ class Memory:
         Divergent memory: Spread activation from a seed entity.
         
         Activates the entire knowledge network from one trigger point.
-        Like human memory: "Enterprise" → User A, City A, Industry...
+        Like human memory: "海科" → User, 东营, 化工...
         
         Args:
             seed: Starting entity
@@ -308,7 +380,7 @@ class Memory:
         """
         Convergent memory: Multiple clues aggregating to core entity.
         
-        Like human reasoning: "BLUF" + "IT" + "City A" → User A
+        Like human reasoning: "BLUF" + "IT" + "东营" → User
         
         Args:
             clues: List of clue entities
@@ -494,6 +566,110 @@ class Memory:
     def update(self, memory_id: int, **kwargs):
         """Update a memory."""
         self.core.update_fact(memory_id, **kwargs)
+    
+    # ==================== Ontology Integration ====================
+    
+    def detect_entities(self, content: str, source: str = 'memory') -> List[Dict[str, Any]]:
+        """
+        Detect entities from content using Ontology.
+        
+        Args:
+            content: Content to analyze
+            source: Source identifier
+            
+        Returns:
+            List of detected entities
+        """
+        if self.ontology is None:
+            return []
+        
+        result = self.ontology.process_content(content, source)
+        entities = result.get('entities', [])
+        
+        # Convert Entity objects to dict
+        return [
+            {
+                'name': e.name,
+                'type': e.type,
+                'confidence': e.confidence,
+                'context': e.context,
+                'source': e.source
+            }
+            for e in entities
+        ]
+    
+    def infer_relations(self, min_confidence: float = 0.7) -> List[Dict[str, Any]]:
+        """
+        Infer relations using Ontology rules.
+        
+        Args:
+            min_confidence: Minimum confidence threshold
+            
+        Returns:
+            List of inferred relations
+        """
+        if self.ontology is None:
+            return []
+        
+        relations = self.ontology.relation_inferencer.infer_relations()
+        
+        # Convert Relation objects to dict
+        return [
+            {
+                'from': r.from_entity,
+                'relation': r.relation_type,
+                'to': r.to_entity,
+                'confidence': r.confidence,
+                'reason': r.reason
+            }
+            for r in relations if r.confidence >= min_confidence
+        ]
+    
+    def process_content_with_ontology(self, content: str, save: bool = False) -> Dict[str, Any]:
+        """
+        Process content with Ontology integration.
+        
+        Args:
+            content: Content to process
+            save: Whether to save results to database
+            
+        Returns:
+            Processing result with entities and relations
+        """
+        if self.ontology is None:
+            return {
+                'entities': [],
+                'relations': [],
+                'status': 'ontology_not_available'
+            }
+        
+        result = self.ontology.process_content(content)
+        
+        if save:
+            save_result = self.ontology.save_to_database(result)
+            result['save_result'] = save_result
+        
+        return {
+            'entities': [
+                {
+                    'name': e.name,
+                    'type': e.type,
+                    'confidence': e.confidence
+                }
+                for e in result.get('entities', [])
+            ],
+            'relations': [
+                {
+                    'from': r.from_entity,
+                    'relation': r.relation_type,
+                    'to': r.to_entity,
+                    'confidence': r.confidence
+                }
+                for r in result.get('relations', [])
+            ],
+            'stats': result.get('stats'),
+            'status': 'success'
+        }
 
 
 def get_memory(db_path: str = None, session_id: str = None) -> Memory:

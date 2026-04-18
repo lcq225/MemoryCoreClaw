@@ -114,9 +114,9 @@ def load_reranker_config() -> Dict:
     """
     import os
     
-    copaw_dir = os.environ.get('COPAW_DIR', '/path/to/copaw')
-    secret_dir = os.environ.get('COPAW_SECRET_DIR', '/path/to/copaw/secret')
-    config_path = os.path.join(copaw_dir, 'config.json')
+    workspace_dir = os.environ.get('WORKSPACE_DIR', '/path/to/workspace')
+    secret_dir = os.environ.get('SECRET_DIR', '/path/to/secret')
+    config_path = os.path.join(workspace_dir, 'config.json')
     
     try:
         with open(config_path, 'r', encoding='utf-8') as f:

@@ -9,7 +9,7 @@ from datetime import datetime
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-db_path = '/path/to\CoPaw\.copaw\.agent-memory\memory.db'
+db_path = os.environ.get('MEMORY_DB_PATH', 'memory.db')
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
@@ -17,7 +17,7 @@ today = datetime.now().strftime('%Y-%m-%d')
 
 # 今日重要事实记忆
 facts = [
-    ('project', f'Enterprise extension module created - src/copaw/extensions/enterprise/ 目录，包含技能效用追踪钩子和记忆增强工具函数', 0.8, today),
+    ('project', f'Enterprise extension module created - src/extensions/enterprise/ 目录，包含技能效用追踪钩子和记忆增强工具函数', 0.8, today),
     ('github', f'GitHub Issue #2215 提交 - Feature Request: memory_compact_skip_summary 配置选项', 0.7, today),
     ('github', f'GitHub Issue #2216 提交 - Feature Request: Skill/Tool Execution Tracking 功能', 0.7, today),
     ('decision', f'核心代码修改策略决策 - 暂时保留侵入式修改，等待官方 Issue 回复，等 v0.3.0 时再论证', 0.9, today),

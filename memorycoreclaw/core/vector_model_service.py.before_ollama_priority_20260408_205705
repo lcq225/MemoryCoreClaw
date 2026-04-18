@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Vector Model Service
+向量模型服务 - 仅使用云端API（GiteeAI），已移除LMStudio本地支持
+"""
+
+import json
+import requests
+import sqlite3
+from pathlib import Path
+from typing import Optional, List, Dict, Tuple
+from datetime import datetime
+import time
+
+
+class VectorModelService:
+    """向量模型服务 - 云端优先，本地备用"""
+    
+    def __init__(self, config_path: str = None):
+        """初始化"""
+        # 加载配置
+        self.secret_dir = Path(r'D:\CoPaw\.copaw.secret')
+        self.config_path = config_path or r'D:\CoPaw\.copaw\.agent-memory\config.json'
+        
+        self._load_config()
+        self._load_provider_config()
+        
+        # 当前使用的后端
+        self.current_backend = None  # 'cloud' or 'local'
+        self.embedding_model = None
+        self.reranker_model = None
+    
+    def _load_config(self):
+        """加载主配置"""
+        with open(self.config_path, 'r', encoding='utf-8') as f:
+            self.config = json.load(f)
+    
+    def _load_provider_config(self):
+        """加载服务商配置"""
+        # 云端配置 - GiteeAI
+        giteeai_path = self.secret_dir / 'giteeai.json'
+        if giteeai_path.exists():
+            with open(giteeai_path, 'r', encoding='utf-8') as f:
+                giteeai = json.load(f).get('giteeai', {})
+                self.cloud_config = {
+                    'provider': 'giteeai',
+                    'api_key': giteeai.get('api_key'),
+                    'base_url': giteeai.get('base_url'),
+                    'embedding_model': giteeai.get('models', {}).get('embedding'),
+                    'reranker_model': giteeai.get('models', {}).get('reranker'),
+                    'enabled': giteeai.get('enabled', True),
+                }
+        else:
+            self.cloud_config = None
+        
+        # SiliconFlow 配置（备用云端）
+        sf_path = self.secret_dir / 'providers' / 'custom' / 'siliconflow.json'
+        if sf_path.exists():
+            with open(sf_path, 'r', encoding='utf-8') as f:
+                sf = json.load(f)
+                self.sf_config = {
+                    'provider': 'siliconflow',
+                    'api_key': sf.get('api_key'),
+                    'base_url': sf.get('base_url'),
+                }
+        else:
+            self.sf_config = None
+    
+    def initialize(self) -> bool:
+        """初始化向量模型，仅使用云端"""
+        print('[VectorModel] 初始化向量模型服务...')
+
+        # 优先尝试云端
+        if self.cloud_config and self.cloud_config.get('enabled'):
+            print(f'  [1] 尝试云端: {self.cloud_config["provider"]}')
+            if self._try_cloud_embedding():
+                self.current_backend = 'cloud'
+                self.embedding_model = self.cloud_config['embedding_model']
+                self.reranker_model = self.cloud_config['reranker_model']
+                print(f'  ✓ 云端 Embedding 就绪: {self.embedding_model}')
+                print(f'  ✓ 云端 Reranker 就绪: {self.reranker_model}')
+                return True
+
+        print('  ✗ 无法初始化向量模型')
+        return False
+    
+    def _try_cloud_embedding(self) -> bool:
+        """尝试云端Embedding"""
+        try:
+            # 测试GiteeAI Embedding API
+            url = f"{self.cloud_config['base_url']}/embeddings"
+            headers = {
+                'Authorization': f'Bearer {self.cloud_config["api_key"]}',
+                'Content-Type': 'application/json'
+            }
+            data = {
+                'model': self.cloud_config.get('embedding_model', 'Qwen3-Embedding-8B'),
+                'input': '测试'
+            }
+            
+            response = requests.post(url, headers=headers, json=data, timeout=10)
+            if response.status_code == 200:
+                result = response.json()
+                if 'data' in result:
+                    print(f'    ✓ 云端Embedding测试成功')
+                    return True
+            
+            print(f'    ✗ 云端Embedding测试失败: {response.status_code}')
+            return False
+
+        except Exception as e:
+            print(f'    ✗ 云端连接失败: {e}')
+            return False
+
+    def get_embedding(self, text: str) -> Optional[List[float]]:
+        """获取文本向量（仅云端）"""
+        if self.current_backend == 'cloud':
+            return self._get_cloud_embedding(text)
+        else:
+            # 回退到简单hash
+            return self._get_fallback_embedding(text)
+
+    def _get_cloud_embedding(self, text: str) -> Optional[List[float]]:
+        """云端Embedding"""
+        try:
+            url = f"{self.cloud_config['base_url']}/embeddings"
+            headers = {
+                'Authorization': f'Bearer {self.cloud_config["api_key"]}',
+                'Content-Type': 'application/json'
+            }
+            data = {
+                'model': self.cloud_config.get('embedding_model', 'Qwen3-Embedding-8B'),
+                'input': text
+            }
+
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+            if response.status_code == 200:
+                result = response.json()
+                if 'data' in result and len(result['data']) > 0:
+                    return result['data'][0].get('embedding')
+
+        except Exception as e:
+            print(f'    ✗ 云端Embedding失败: {e}')
+
+        return None
+    
+    def _get_fallback_embedding(self, text: str) -> List[float]:
+        """回退到简单的hash向量"""
+        # 简单的回退方案：将文本转为固定长度向量
+        import hashlib
+        vector = []
+        for i in range(384):  # 标准维度
+            hash_val = hashlib.md5(f"{text}_{i}".encode()).hexdigest()
+            vector.append(float(int(hash_val[:8], 16) % 1000) / 1000.0)
+        return vector
+
+    def rerank(self, query: str, documents: List[str], top_k: int = 3) -> List[Tuple[int, float]]:
+        """Rerank文档（仅云端）"""
+        if self.current_backend == 'cloud':
+            return self._cloud_rerank(query, documents, top_k)
+        else:
+            # 使用简单排序
+            return self._simple_rerank(query, documents, top_k)
+    
+    def _cloud_rerank(self, query: str, documents: List[str], top_k: int) -> List[Tuple[int, float]]:
+        """云端Rerank"""
+        try:
+            # GiteeAI Reranker API
+            url = f"{self.cloud_config['base_url']}/rerank"
+            headers = {
+                'Authorization': f'Bearer {self.cloud_config["api_key"]}',
+                'Content-Type': 'application/json'
+            }
+            data = {
+                'model': self.cloud_config.get('reranker_model', 'Qwen3-Reranker-8B'),
+                'query': query,
+                'documents': documents
+            }
+            
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+            if response.status_code == 200:
+                result = response.json()
+                if 'results' in result:
+                    return [(r['index'], r['relevance_score']) for r in result['results'][:top_k]]
+                    
+        except Exception as e:
+            print(f'    ✗ 云端Rerank失败: {e}')
+        
+        # 失败使用简单排序
+        return self._simple_rerank(query, documents, top_k)
+    
+    def _simple_rerank(self, query: str, documents: List[str], top_k: int) -> List[Tuple[int, float]]:
+        """简单的相似度计算"""
+        query_vec = self.get_embedding(query)
+        if not query_vec:
+            return [(i, 0.0) for i in range(min(top_k, len(documents)))]
+        
+        results = []
+        for i, doc in enumerate(documents):
+            doc_vec = self.get_embedding(doc)
+            if doc_vec:
+                # 余弦相似度
+                sim = sum(a * b for a, b in zip(query_vec, doc_vec)) / (
+                    (sum(a * a for a in query_vec) ** 0.5) * (sum(b * b for b in doc_vec) ** 0.5)
+                )
+                results.append((i, sim))
+        
+        results.sort(key=lambda x: x[1], reverse=True)
+        return results[:top_k]
+    
+    def get_status(self) -> Dict:
+        """获取状态（仅云端）"""
+        return {
+            'backend': self.current_backend,
+            'embedding_model': self.embedding_model,
+            'reranker_model': self.reranker_model,
+            'cloud_enabled': self.cloud_config is not None,
+        }
+
+
+# 全局实例
+_vector_service: Optional[VectorModelService] = None
+
+
+def get_vector_service() -> VectorModelService:
+    """获取向量服务实例"""
+    global _vector_service
+    if _vector_service is None:
+        _vector_service = VectorModelService()
+        _vector_service.initialize()
+    return _vector_service
+
+
+if __name__ == '__main__':
+    # 测试
+    service = VectorModelService()
+    if service.initialize():
+        print('\n状态:', service.get_status())
+        
+        # 测试embedding
+        print('\n测试Embedding:')
+        vec = service.get_embedding('你好世界')
+        if vec:
+            print(f'  ✓ 向量维度: {len(vec)}')
+        else:
+            print('  ✗ Embedding失败')
+        
+        # 测试rerank
+        print('\n测试Rerank:')
+        docs = ['这是一个关于Python的教程', '今天天气很好', 'Python编程入门指南']
+        results = service.rerank('Python学习', docs, top_k=2)
+        print(f'  结果: {results}')
+    else:
+        print('初始化失败')

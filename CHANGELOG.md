@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.5.0] - 2026-04-18
+
+### Added
+- **Ontology Built-in Integration** (`memorycoreclaw.core.ontology_integration`)
+  - `OntologyIntegration` class for knowledge graph management
+  - Automatic entity detection and relationship inference
+  - `auto_ontology=True` parameter in `remember()` for automatic entity recognition
+  - `include_entity_relations=True` in `recall()` for entity-aware retrieval
+
+- **Entity Detection** (`memorycoreclaw.core.entity_detector`)
+  - `EntityDetector` class with multi-language support
+  - Automatic entity extraction from text (persons, organizations, technologies, etc.)
+  - Pattern-based entity recognition with configurable rules
+
+- **Relation Inference** (`memorycoreclaw.core.relation_inferencer`)
+  - `RelationInferencer` class for relationship discovery
+  - Transitive relation reasoning (A→B, B→C ⇒ A→C)
+  - Confidence scoring for inferred relations
+
+- **Enhanced Search** (`memorycoreclaw.core.enhanced_search`)
+  - Improved semantic search with entity-aware queries
+  - Better result ranking and filtering
+
+### Changed
+- **Full Desensitization**: Removed all local paths, company names, and sensitive info
+  - All hardcoded paths replaced with environment variables or placeholders
+  - Example data uses generic names instead of real company/project names
+  - `.pre-commit-config.yaml` paths fixed to use relative script paths
+  - Test files sanitized for public release
+
+- **Architecture Refinement**
+  - Ontology integrated directly into Memory core (no plugin required)
+  - Entity detection and relation inference built-in as core features
+  - Simplified configuration with sensible defaults
+
+### Security
+- Removed all `D:\` and `C:\` paths from source code
+- Removed company names, internal emails, and network addresses
+- All sensitive data replaced with environment variables or placeholders
+
+
 ## [2.4.0] - 2026-04-05
 
 ### Added

@@ -183,36 +183,34 @@ export MEMORY_EMBEDDING_MODEL="text-embedding-3-small"
 
 ## 与 AI Agent 集成
 
-### 与 CoPaw 集成
+### 与 AI Agent 平台集成
 
-MemoryCoreClaw 可作为 CoPaw 的技能使用：
+MemoryCoreClaw 可作为 AI Agent 平台的技能/模块使用：
 
 ```
-# 目录结构
-.copaw/
-└── workspaces/
-    └── default/
-        └── active_skills/
-            └── memorycoreclaw/
-                ├── __init__.py
-                ├── core/
-                ├── cognitive/
-                ├── retrieval/
-                ├── storage/
-                ├── utils/
-                └── scripts/
+# 目录结构（以通用 Agent 平台为例）
+agent_workspace/
+└── skills/
+    └── memorycoreclaw/
+        ├── __init__.py
+        ├── core/
+        ├── cognitive/
+        ├── retrieval/
+        ├── storage/
+        ├── utils/
+        └── scripts/
 ```
 
 ```python
-# 在 CoPaw 中使用
+# 在 AI Agent 中使用
 import sys
-sys.path.insert(0, 'active_skills')
+sys.path.insert(0, 'skills')
 from memorycoreclaw import Memory
 
-mem = Memory(db_path=r"memory.db")
+mem = Memory(db_path="memory.db")
 
 # 记住用户偏好
-mem.remember("用户喜欢简洁的回复", importance=0.85, category="preference")
+mem.remember("User prefers concise responses", importance=0.85, category="preference")
 
 # 召回记忆辅助回复
 preferences = mem.recall_by_category("preference")

@@ -86,8 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `vector_index_manager.py` - Vector index management
 
 ### Changed
-- Unified version across CoPaw local and GitHub
-- Updated author to "Mr.Lee & 老K"
+- Unified version across local and GitHub
+- Updated author information
 - Enhanced `__init__.py` with more exports
 
 ### Technical Notes

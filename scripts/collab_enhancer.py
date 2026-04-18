@@ -1,7 +1,7 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 主动协作增强器 - 主动汇报、确认执行、智能提醒
-提升与User A协作的效率和体验
+提升与用户协作的效率和体验
 """
 import sys
 import io
@@ -64,7 +64,7 @@ class CollaborationEnhancer:
             # 查找User A相关信息
             cursor.execute('''
                 SELECT content, category FROM facts 
-                WHERE content LIKE '%User A%' OR content LIKE '%Lee%'
+                WHERE content LIKE '%User A%' OR content LIKE '%User%'
                 ORDER BY importance DESC LIMIT 20
             ''')
             

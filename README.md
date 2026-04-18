@@ -87,6 +87,14 @@ Based on the Ebbinghaus forgetting curve model:
 - **SafeDatabaseManager** - SQL injection prevention
 - **MemoryHealthChecker** - Database health monitoring
 
+### 🏛️ Ontology & Knowledge Graph (New in v2.5.0)
+
+- **Built-in Ontology** - Class hierarchy, attribute inheritance, and relationship reasoning with 28+ relation types
+- **Entity Detection** - Automatic entity recognition from text (Person, Organization, Technology, Project, etc.) with confidence scoring
+- **Relation Inference** - Intelligent relation extraction and inference between entities, supporting transitive and symmetric reasoning
+- **Enhanced Search** - Combined keyword, semantic, and relation-aware search for comprehensive memory retrieval
+- **Knowledge Triple** - Subject-Predicate-Object structured memory storage for precise knowledge representation
+
 #### Screenshots
 
 **Knowledge Graph:**
@@ -169,20 +177,32 @@ MemoryCoreClaw/
 ├── memorycoreclaw/          # Core code
 │   ├── core/                # Core engine
 │   │   ├── engine.py        # Memory engine
-│   │   └── memory.py        # Unified interface
+│   │   ├── memory.py        # Unified interface
+│   │   ├── entity_detector.py      # Entity detector (v2.5.0)
+│   │   ├── relation_inferencer.py  # Relation inferencer (v2.5.0)
+│   │   └── ontology_integration.py # Ontology integration (v2.5.0)
 │   ├── cognitive/           # Cognitive modules
 │   │   ├── forgetting.py    # Forgetting curve
 │   │   ├── contextual.py    # Contextual memory
 │   │   └── working_memory.py # Working memory
 │   ├── retrieval/           # Retrieval modules
 │   │   ├── semantic.py      # Semantic search
-│   │   └── ontology.py      # Ontology
+│   │   ├── ontology.py      # Ontology
+│   │   └── reranker.py      # Reranker service (v2.4.0)
 │   ├── storage/             # Storage modules
 │   │   ├── database.py      # Database
 │   │   └── multimodal.py    # Multimodal
-│   └── utils/               # Utility modules
-│       ├── export.py        # Export
-│       └── visualization.py # Visualization
+│   ├── utils/               # Utility modules
+│   │   ├── export.py        # Export
+│   │   ├── visualization.py # Visualization
+│   │   └── github_api.py    # GitHub API (v2.1.0)
+│   ├── safe_memory.py       # Safe interface (v2.1.0)
+│   └── core/plugin_system.py # Plugin system (v2.4.0)
+├── scripts/                 # Maintenance scripts (v2.1.0)
+│   ├── check_memory.py      # Database check
+│   ├── optimize_database.py # Database optimization
+│   ├── sync_to_memory_md.py # Sync export
+│   └── ...                  # More scripts
 ├── docs/                    # Documentation
 │   ├── GETTING_STARTED.md   # Getting started
 │   ├── API.md               # API reference

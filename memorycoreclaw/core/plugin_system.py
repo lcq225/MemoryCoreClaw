@@ -19,8 +19,8 @@ MemoryCoreClaw Plugin System
 3. 配置驱动：通过配置文件启用/禁用插件
 4. 安全隔离：插件运行在沙箱环境中
 
-版本：2.2.0
-作者：Mr.Lee & 老K
+Version: 2.2.0
+Author: MemoryCoreClaw Contributors
 """
 
 from abc import ABC, abstractmethod

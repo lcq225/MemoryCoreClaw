@@ -331,9 +331,9 @@ def main():
     
     # 存储事实
     fact_id = enhancer.store_fact(
-        content="Mr Lee works at 山东海科化工集团",
-        entity="Mr Lee",
-        value="山东海科化工集团",
+        content="John Smith works at TechCorp Group",
+        entity="John Smith",
+        value="TechCorp Group",
         confidence=0.9,
         source="profile",
         category="work",
@@ -342,7 +342,7 @@ def main():
     print(f'[Test] Stored fact ID: {fact_id}')
     
     # 提取并存储
-    text = "老K是一个AI助手，它是全能助手，具有顶级管理者、领导者思维"
+    text = "Alice is an AI assistant with management and technical skills"
     fact_ids = enhancer.extract_and_store(text, source="extraction")
     print(f'[Test] Extracted {len(fact_ids)} facts from text')
     

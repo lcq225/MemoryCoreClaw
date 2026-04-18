@@ -366,10 +366,10 @@ if __name__ == '__main__':
     
     # 测试内容
     test_contents = [
-        "Mr Lee, 43岁, 山东海科化工集团, 卓越与智能部",
+        "John Smith, 43 years old, TechCorp Group, Engineering Dept",
         "AI assistant using modern tech stack",
-        "海科化工正在推进智能转型项目",
-        "ERP系统和MES系统需要集成"
+        "TechCorp is advancing digital transformation project",
+        "ERP system and MES system need integration"
     ]
     
     print("测试内容:")

@@ -295,7 +295,7 @@ def main():
         action="create_presentation",
         outcome="Successfully created presentation with 10 slides",
         importance=0.8,
-        context={"user": "Mr Lee", "tool": "pptx"},
+        context={"user": "John Smith", "tool": "pptx"},
         tags=["presentation", "pptx", "success"]
     )
     print(f'[Test] Stored episode ID: {episode_id}')

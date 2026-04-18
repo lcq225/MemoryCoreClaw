@@ -25,7 +25,7 @@ def test_episodic_memory():
         action="create_presentation",
         outcome="Successfully created presentation with 10 slides",
         importance=0.9,
-        context={"user": "Mr Lee", "tool": "pptx", "slides": 10},
+        context={"user": "John Smith", "tool": "pptx", "slides": 10},
         tags=["presentation", "pptx", "success"]
     )
     print(f'    1.1 记住事件: ID={event_id} - {"PASS" if event_id else "FAIL"}')

@@ -2,7 +2,7 @@
 # Human-brain-inspired Long-term Memory Engine for AI Agents
 
 __version__ = "2.5.0"  # v2.5.0 - Ontology built-in + Entity detection + Relation inference + Full desensitization
-__author__ = "Mr.Lee & 老K"
+__author__ = "MemoryCoreClaw Contributors"
 
 from .core.memory import Memory, get_memory
 from .core.engine import MemoryEngine, MemoryLayer, Emotion, Fact, Lesson, STANDARD_RELATIONS
